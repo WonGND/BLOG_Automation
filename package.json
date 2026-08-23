@@ -1,0 +1,20 @@
+{
+  "name": "blog-automation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "한국어 생활정보 블로그 콘텐츠 생성 엔진 (네이버 블로그용 평문 원고)",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test test/smoke.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
+    "express": "^5.2.1"
+  }
+}
