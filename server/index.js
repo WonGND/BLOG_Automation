@@ -7,9 +7,23 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(here, "..");
 
 // .env 를 읽어 환경변수로 올린다 (없어도 조용히 넘어간다).
+// process.loadEnvFile 은 Node 20.12 이상에만 있어서 직접 파싱하는 경로를 함께 둔다.
+function loadEnv(envPath) {
+  if (!fs.existsSync(envPath)) return;
+  if (typeof process.loadEnvFile === "function") {
+    process.loadEnvFile(envPath);
+    return;
+  }
+  for (const line of fs.readFileSync(envPath, "utf8").split("\n")) {
+    const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+    if (!m || line.trimStart().startsWith("#")) continue;
+    const value = m[2].trim().replace(/^(['"])(.*)\1$/, "$2");
+    if (process.env[m[1]] === undefined) process.env[m[1]] = value;
+  }
+}
+
 try {
-  const envPath = path.join(rootDir, ".env");
-  if (fs.existsSync(envPath)) process.loadEnvFile(envPath);
+  loadEnv(path.join(rootDir, ".env"));
 } catch (err) {
   console.warn(".env 를 읽지 못했어요:", err.message);
 }
