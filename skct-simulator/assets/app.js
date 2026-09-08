@@ -132,6 +132,16 @@
     if (pct >= 15) return "낮음";
     return "매우 낮음";
   }
+  var storageOK = (function () {
+    try {
+      localStorage.setItem("skct.probe", "1");
+      localStorage.removeItem("skct.probe");
+      return true;
+    } catch (e) { return false; }
+  })();
+
+  /* 값을 주면 쓰기(성공 여부를 boolean으로 돌려준다), 안 주면 읽기.
+     사생활 보호 모드나 용량 초과로 실패해도 검사 자체는 계속 진행된다. */
   function store(key, val) {
     try {
       if (val === undefined) {
@@ -140,10 +150,13 @@
       }
       if (val === null) localStorage.removeItem(key);
       else localStorage.setItem(key, JSON.stringify(val));
-    } catch (e) { /* 사생활 보호 모드 등 — 저장 없이 계속 진행 */ }
-    return null;
+      return true;
+    } catch (e) {
+      return val === undefined ? null : false;
+    }
   }
 
+  var BANK_VERSION = 1;
   var K_SESSION = "skct.v1.session";
   var K_HISTORY = "skct.v1.history";
   var K_THEME = "skct.v1.theme";
@@ -371,13 +384,20 @@
 
   /* ---------------- 상태 ---------------- */
 
-  var state = { screen: "home", session: null, result: null, timerId: null };
+  var state = { screen: "home", session: null, result: null, timerId: null, ui: null, submitting: false };
 
   function newSession(setId) {
     return {
+      bankVersion: BANK_VERSION,
       setId: setId, index: 0, answers: {}, picks: {},
       startedAt: Date.now(), carryMs: 0, elapsedSec: 0, finishedAt: null
     };
+  }
+
+  /* 저장된 세션을 이어받아도 되는지 — 세트가 사라졌거나 문항 은행이 바뀌었으면 버린다. */
+  function isResumable(saved) {
+    return !!(saved && !saved.finishedAt && saved.setId && setDef(saved.setId) &&
+      saved.bankVersion === BANK_VERSION && saved.index > 0);
   }
   function saveSession() {
     var s = state.session;
@@ -391,7 +411,7 @@
   }
   function history() { return store(K_HISTORY) || []; }
   function pushHistory(result) {
-    var h = history();
+    var h = history() || [];
     h.unshift({
       id: "r" + result.finishedAt,
       setId: result.setId, setCode: result.setCode, setName: result.setName,
@@ -400,7 +420,17 @@
       verdictLevel: result.verdict.level, verdictTitle: result.verdict.title,
       full: result
     });
-    store(K_HISTORY, h.slice(0, 30));
+    h = h.slice(0, 30);
+    /* 원자료까지 들고 있으면 금방 용량을 넘긴다. 최근 8건만 통째로 남긴다. */
+    h.forEach(function (item, i) { if (i >= 8) delete item.full; });
+
+    var ok = store(K_HISTORY, h);
+    while (!ok && h.length > 1) {
+      h = h.slice(0, Math.max(1, h.length - 4));
+      h.forEach(function (item, i) { if (i >= 2) delete item.full; });
+      ok = store(K_HISTORY, h);
+    }
+    if (!ok && storageOK) toast("저장 공간이 부족해 이번 결과를 기록에 남기지 못했다. 결과 데이터를 내려받아 두는 것이 좋다.");
   }
 
   /* ---------------- 공통 UI ---------------- */
@@ -431,7 +461,7 @@
     var bar = el("div", { class: "appbar" }, [
       el("a", { class: "brand", href: "#", onclick: function (e) { e.preventDefault(); go("home"); } }, [
         el("span", { class: "mark", text: "SKCT" }),
-        el("span", { text: "심층역량검사 시뮬레이터" }),
+        el("span", { class: "name", text: "심층역량 리허설" }),
         el("span", { class: "sub", text: "연습용" })
       ])
     ]);
@@ -441,11 +471,29 @@
     return bar;
   }
 
-  function go(screen) {
+  function go(screen, fromPop) {
     state.screen = screen;
+    if (!fromPop) {
+      try { window.history.pushState({ skct: screen }, ""); } catch (e) { /* 히스토리 조작이 막힌 환경 */ }
+    }
     render();
     window.scrollTo(0, 0);
   }
+
+  /* 뒤로가기: 응시 중이면 진행 상황을 저장하고 홈으로 — 페이지를 벗어나지 않는다. */
+  window.addEventListener("popstate", function () {
+    if (state.screen === "test") { saveSession(); stopTimer(); }
+    go("home", true);
+  });
+
+  /* 응시 중 새로고침·탭 닫기 경고. 진행 상황은 저장돼 있지만 실수로 나가는 것을 한 번 막는다. */
+  window.addEventListener("beforeunload", function (e) {
+    if (state.screen === "test" && state.session && !state.submitting) {
+      e.preventDefault();
+      e.returnValue = "";
+      return "";
+    }
+  });
 
   /* ---------------- 홈 ---------------- */
 
@@ -476,7 +524,7 @@
     ]);
     wrap.appendChild(hero);
 
-    if (saved && saved.index > 0 && !saved.finishedAt) {
+    if (isResumable(saved)) {
       var sd = setDef(saved.setId);
       var sh = sheetFor(saved.setId);
       var resume = el("div", { class: "panel", style: "margin-bottom:32px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;" }, [
@@ -568,8 +616,11 @@
           el("td", { class: "num", text: h.coreAverage === null ? "—" : String(h.coreAverage) }),
           el("td", {}, [el("span", { class: "chip " + h.verdictLevel, text: h.verdictLevel === "good" ? "양호" : h.verdictLevel === "warning" ? "주의" : "경고" })]),
           el("td", {}, [el("button", {
-            class: "linkbtn", type: "button", text: "결과 보기",
-            onclick: function () { state.result = h.full; go("result"); }
+            class: "linkbtn", type: "button",
+            text: h.full ? "결과 보기" : "원자료 없음",
+            title: h.full ? "" : "저장 공간을 아끼려고 오래된 기록의 상세 데이터는 정리되었다",
+            disabled: h.full ? null : "",
+            onclick: function () { if (h.full) { state.result = h.full; go("result"); } }
           })])
         ]));
       });
@@ -638,12 +689,16 @@
     var group = sheet.groups[gi];
     var pick = s.picks[gi] = s.picks[gi] || {};
 
+    /* 응답할 때마다 화면을 통째로 다시 그리면 포커스가 날아가고 화면이 깜빡인다.
+       필요한 버튼만 고쳐 쓰기 위해 참조를 모아 둔다. */
+    var ui = { gi: gi, group: group, scaleBtns: {}, pickBtns: { most: [], least: [] }, statusEl: null };
+
     var frag = document.createDocumentFragment();
 
     var timer = el("span", { class: "timer", id: "timer", text: mmss(remainingSec()) });
     frag.appendChild(appbar([
       el("div", { class: "appbar-spacer" }),
-      el("span", { style: "font-family:var(--mono); font-size:12px; color:var(--ink-3);", text: def.code }),
+      el("span", { class: "setcode", text: def.code }),
       timer,
       el("button", {
         class: "iconbtn", type: "button", text: "중단",
@@ -655,8 +710,9 @@
       })
     ]));
 
-    var prog = el("div", { class: "progressbar" }, [el("span", { style: "width:" + ((gi) / total * 100) + "%" })]);
-    frag.appendChild(prog);
+    frag.appendChild(el("div", { class: "progressbar" }, [
+      el("span", { style: "width:" + (gi / total * 100) + "%" })
+    ]));
 
     var wrap = el("div", { class: "wrap narrow" });
 
@@ -665,7 +721,7 @@
         el("b", { text: String(gi + 1) }),
         el("span", { text: " / " + total + " 문항군" })
       ]),
-      el("div", { style: "font-size:12.5px; color:var(--ink-3);", text: def.name })
+      el("div", { class: "setname", text: def.name })
     ]));
 
     var card = el("div", { class: "qcard" });
@@ -679,18 +735,22 @@
 
     group.forEach(function (item, si) {
       var scale = el("div", { class: "scale", role: "group", "aria-label": MARKS[si] + " 문장 응답" });
+      var btns = [];
       for (var v = 1; v <= 5; v++) {
         (function (val) {
-          scale.appendChild(el("button", {
+          var b = el("button", {
             type: "button",
             text: "①②③④⑤"[val - 1],
             title: val + " — " + SCALE_LABELS[val - 1],
             "aria-label": SCALE_LABELS[val - 1],
             "aria-pressed": String(s.answers[item.id] === val),
             onclick: function () { setAnswer(item.id, val); }
-          }));
+          });
+          btns.push(b);
+          scale.appendChild(b);
         })(v);
       }
+      ui.scaleBtns[item.id] = btns;
       card.appendChild(el("div", { class: "stmt" }, [
         el("div", { class: "stmt-text" }, [
           el("span", { class: "stmt-tag", text: MARKS[si] }),
@@ -703,44 +763,43 @@
     function pickRow(kind) {
       var row = el("div", { class: "pickrow " + kind });
       group.forEach(function (item, si) {
-        row.appendChild(el("button", {
+        var b = el("button", {
           type: "button",
           text: MARKS[si],
           "aria-pressed": String(pick[kind] === item.id),
           onclick: function () { setPick(gi, kind, item.id); }
-        }));
+        });
+        ui.pickBtns[kind].push(b);
+        row.appendChild(b);
       });
       return row;
     }
 
     card.appendChild(el("div", { class: "forced" }, [
       el("div", { class: "forced-group" }, [
-        el("div", { class: "label", html: "가장 <em>가깝다</em> (Most)" }),
+        el("div", { class: "label", html: "셋 중 나와 가장 <em>가깝다</em>" }),
         pickRow("most")
       ]),
       el("div", { class: "forced-group" }, [
-        el("div", { class: "label", html: "가장 <em>멀다</em> (Least)" }),
+        el("div", { class: "label", html: "셋 중 나와 가장 <em>멀다</em>" }),
         pickRow("least")
       ])
     ]));
     wrap.appendChild(card);
 
-    var complete = group.every(function (i) { return s.answers[i.id]; }) && pick.most && pick.least;
     var isLast = gi === total - 1;
+    ui.statusEl = el("span", { class: "status" });
 
     wrap.appendChild(el("div", { class: "navrow" }, [
       el("button", {
         class: "btn", type: "button", text: "← 이전", disabled: gi === 0 ? "" : null,
         onclick: function () { if (gi > 0) { s.index = gi - 1; saveSession(); render(); } }
       }),
-      el("span", {
-        class: "status" + (complete ? "" : " incomplete"),
-        text: complete ? "응답 완료" : "문장 3개 응답과 가깝다/멀다 선택이 모두 필요하다"
-      }),
+      ui.statusEl,
       el("div", { class: "spacer" }),
       isLast
         ? el("button", { class: "btn btn-primary", type: "button", text: "제출하고 결과 보기", onclick: function () { submit(false); } })
-        : el("button", { class: "btn btn-primary", type: "button", text: "다음 →", onclick: next })
+        : el("button", { class: "btn btn-primary", type: "button", text: "다음 →", onclick: function () { next(); } })
     ]));
 
     wrap.appendChild(el("div", { class: "kbdhint", html:
@@ -750,16 +809,46 @@
     }));
 
     frag.appendChild(wrap);
+    state.ui = ui;
+    refreshStatus();
     return frag;
   }
 
-  function setAnswer(id, val) {
-    state.session.answers[id] = val;
-    saveSession();
-    render();
+  /* ---------- 응시 화면 부분 갱신 ---------- */
+
+  function refreshStatus() {
+    var ui = state.ui;
+    if (!ui || !ui.statusEl) return;
+    var s = state.session;
+    var group = ui.group;
+    var pick = s.picks[ui.gi] || {};
+    var unanswered = group.filter(function (i) { return !s.answers[i.id]; }).length;
+    var msg, incomplete = true;
+    if (unanswered) msg = "문장 " + unanswered + "개가 남았다";
+    else if (!pick.most && !pick.least) msg = "가장 가까운 것과 가장 먼 것을 고르면 된다";
+    else if (!pick.most) msg = "가장 가까운 것이 남았다";
+    else if (!pick.least) msg = "가장 먼 것이 남았다";
+    else { msg = "응답 완료"; incomplete = false; }
+    ui.statusEl.textContent = msg;
+    ui.statusEl.className = "status" + (incomplete ? " incomplete" : "");
   }
+
+  function setAnswer(id, val) {
+    var s = state.session;
+    if (!s) return;
+    s.answers[id] = val;
+    saveSession();
+    var btns = state.ui && state.ui.scaleBtns[id];
+    if (btns) {
+      btns.forEach(function (b, i) { b.setAttribute("aria-pressed", String(i + 1 === val)); });
+      refreshStatus();
+    } else render();
+  }
+
   function setPick(gi, kind, id) {
-    var p = state.session.picks[gi] = state.session.picks[gi] || {};
+    var s = state.session;
+    if (!s) return;
+    var p = s.picks[gi] = s.picks[gi] || {};
     var other = kind === "most" ? "least" : "most";
     if (p[kind] === id) delete p[kind];
     else {
@@ -767,8 +856,17 @@
       if (p[other] === id) delete p[other];
     }
     saveSession();
-    render();
+    var ui = state.ui;
+    if (ui && ui.gi === gi) {
+      ["most", "least"].forEach(function (k) {
+        ui.pickBtns[k].forEach(function (b, i) {
+          b.setAttribute("aria-pressed", String(p[k] === ui.group[i].id));
+        });
+      });
+      refreshStatus();
+    } else render();
   }
+
   function next() {
     var sheet = sheetFor(state.session.setId);
     if (state.session.index < sheet.groups.length - 1) {
@@ -781,15 +879,27 @@
 
   function submit(auto) {
     var s = state.session;
+    if (!s || state.submitting) return;   /* 연타·타이머 동시 제출로 결과가 두 번 쌓이는 것을 막는다 */
+    state.submitting = true;
+    stopTimer();
     s.elapsedSec = elapsed();
     s.finishedAt = Date.now();
-    stopTimer();
-    var result = computeResult(s);
+    var result;
+    try {
+      result = computeResult(s);
+    } catch (err) {
+      state.submitting = false;
+      toast("채점 중 문제가 생겼다. 응답은 그대로 남아 있으니 다시 제출해 보면 된다.");
+      startTimer();
+      return;
+    }
     result.autoSubmitted = !!auto;
     pushHistory(result);
     store(K_SESSION, null);
     state.result = result;
     state.session = null;
+    state.ui = null;
+    state.submitting = false;
     go("result");
     if (auto) toast("제한 시간이 끝나 자동 제출되었다.");
   }
@@ -797,7 +907,7 @@
   function startTimer() {
     stopTimer();
     state.timerId = setInterval(function () {
-      if (state.screen !== "test" || !state.session) return;
+      if (state.screen !== "test" || !state.session || state.submitting) return;
       var left = remainingSec();
       var t = $("#timer");
       if (t) {
@@ -810,10 +920,13 @@
   function stopTimer() { if (state.timerId) { clearInterval(state.timerId); state.timerId = null; } }
 
   document.addEventListener("keydown", function (e) {
-    if (state.screen !== "test" || !state.session) return;
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (state.screen !== "test" || !state.session || state.submitting) return;
+    if (e.metaKey || e.ctrlKey || e.altKey || !e.key) return;
     var tag = (e.target.tagName || "").toLowerCase();
-    if (tag === "input" || tag === "textarea") return;
+    if (tag === "input" || tag === "textarea" || e.target.isContentEditable) return;
+    /* 버튼에 포커스가 있을 때의 Enter·Space는 버튼이 처리한다.
+       여기서 또 처리하면 문항군이 두 칸씩 넘어간다. */
+    if (tag === "button" && (e.key === "Enter" || e.key === " ")) return;
 
     var s = state.session;
     var sheet = sheetFor(s.setId);
@@ -821,9 +934,10 @@
     var key = e.key.toLowerCase();
 
     if (key >= "1" && key <= "5") {
-      var target = group.filter(function (i) { return !s.answers[i.id]; })[0] || group[2];
+      var target = group.filter(function (i) { return !s.answers[i.id]; })[0];
       e.preventDefault();
-      setAnswer(target.id, Number(key));
+      /* 세 문장을 다 답한 뒤의 숫자 키는 무시한다 — 마지막 응답을 덮어쓰지 않도록. */
+      if (target) setAnswer(target.id, Number(key));
       return;
     }
     var mostKeys = ["a", "s", "d"], leastKeys = ["z", "x", "c"];
@@ -1019,6 +1133,21 @@
         ])
       ])
     ]));
+
+    if (!r.dimensions.length) {
+      wrap.appendChild(el("div", { class: "card" }, [
+        el("div", { class: "card-head" }, [el("h2", { text: "채점할 응답이 없다" })]),
+        el("div", { class: "card-body" }, [
+          el("p", { style: "color:var(--ink-2); font-size:14.5px; max-width:44em;", text: "문항에 응답한 기록이 없어 역량 프로파일을 계산할 수 없다. 세트를 다시 골라 응시하면 된다." })
+        ])
+      ]));
+      wrap.appendChild(el("div", { class: "actions" }, [
+        el("button", { class: "btn btn-primary", type: "button", text: "같은 세트 다시 응시", onclick: function () { startSet(r.setId); } }),
+        el("button", { class: "btn", type: "button", text: "세트 목록", onclick: function () { go("home"); } })
+      ]));
+      frag.appendChild(wrap);
+      return frag;
+    }
 
     var grid = el("div", { class: "resgrid" });
     var main = el("div", { class: "stack" });
@@ -1292,8 +1421,8 @@
   function render() {
     var frag;
     if (state.screen === "test" && state.session) frag = renderTest();
-    else if (state.screen === "result" && state.result) frag = renderResult();
-    else { state.screen = "home"; frag = renderHome(); }
+    else if (state.screen === "result" && state.result) { state.ui = null; frag = renderResult(); }
+    else { state.screen = "home"; state.ui = null; frag = renderHome(); }
 
     root.innerHTML = "";
     root.appendChild(frag);
@@ -1309,6 +1438,11 @@
     document.body.appendChild(toastEl);
     applyTheme(store(K_THEME) || "auto");
     render();
+    if (!storageOK) {
+      setTimeout(function () {
+        toast("이 브라우저에서는 응시 기록을 저장할 수 없다(사생활 보호 모드). 결과는 제출 직후 화면에서만 볼 수 있으니 데이터를 내려받아 두면 된다.");
+      }, 900);
+    }
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
