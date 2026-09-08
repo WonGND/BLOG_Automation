@@ -1,0 +1,2325 @@
+<title>SKCT 심층역량 리허설</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============================================================
+   SKCT 심층역량검사 시뮬레이터
+   토큰: 청회색 중성 + 인디고 액센트 / IBM Plex Sans KR + Plex Mono
+   ============================================================ */
+
+:root {
+  color-scheme: light;
+
+  --page:        #f2f4f8;
+  --surface:     #ffffff;
+  --surface-2:   #f7f9fc;
+  --surface-3:   #eceff5;
+
+  --ink:         #10151b;
+  --ink-2:       #545d69;
+  --ink-3:       #7f8894;
+
+  --line:        #dde3ea;
+  --line-2:      #c6cedb;
+
+  --accent:      #2a78d6;
+  --accent-ink:  #1c5cab;
+  --accent-soft: #e7f0fc;
+  --series-2:    #eb6834;
+
+  --good:      #0ca30c;
+  --warning:   #fab219;
+  --serious:   #ec835a;
+  --critical:  #d03b3b;
+  --good-ink:     #06720b;
+  --warning-ink:  #8a6206;
+  --critical-ink: #a92c2c;
+
+  --shadow-sm: 0 1px 2px rgba(16, 21, 27, .06);
+  --shadow-md: 0 8px 28px -12px rgba(16, 21, 27, .28);
+
+  --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page:        #0c0f13;
+    --surface:     #151a20;
+    --surface-2:   #1b212a;
+    --surface-3:   #222933;
+    --ink:         #eef2f7;
+    --ink-2:       #a6afbb;
+    --ink-3:       #79838f;
+    --line:        #262d37;
+    --line-2:      #39424e;
+    --accent:      #3987e5;
+    --accent-ink:  #86b6ef;
+    --accent-soft: #15283e;
+    --series-2:    #d95926;
+    --good-ink:     #37c437;
+    --warning-ink:  #fab219;
+    --critical-ink: #e87070;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+    --shadow-md: 0 8px 28px -12px rgba(0, 0, 0, .7);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page:        #0c0f13;
+  --surface:     #151a20;
+  --surface-2:   #1b212a;
+  --surface-3:   #222933;
+  --ink:         #eef2f7;
+  --ink-2:       #a6afbb;
+  --ink-3:       #79838f;
+  --line:        #262d37;
+  --line-2:      #39424e;
+  --accent:      #3987e5;
+  --accent-ink:  #86b6ef;
+  --accent-soft: #15283e;
+  --series-2:    #d95926;
+  --good-ink:     #37c437;
+  --warning-ink:  #fab219;
+  --critical-ink: #e87070;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-md: 0 8px 28px -12px rgba(0, 0, 0, .7);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { margin: 0; font-weight: 600; text-wrap: balance; line-height: 1.3; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- 앱 셸 ---------- */
+
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 54px;
+  padding: 0 20px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  text-decoration: none;
+}
+.brand .mark {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: var(--surface);
+  background: var(--accent);
+  padding: 3px 6px;
+  border-radius: var(--r-sm);
+}
+.brand .sub { font-size: 12px; font-weight: 400; color: var(--ink-3); }
+
+.appbar-spacer { flex: 1; }
+
+.iconbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 11px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: var(--ink-2);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.iconbtn:hover { background: var(--surface-2); color: var(--ink); border-color: var(--line-2); }
+
+.wrap { max-width: 1080px; margin: 0 auto; padding: 40px 20px 96px; }
+.wrap.narrow { max-width: 820px; }
+
+/* ---------- 홈 ---------- */
+
+.hero { display: grid; gap: 14px; margin-bottom: 40px; }
+.hero h1 { font-size: clamp(26px, 4vw, 36px); letter-spacing: -.02em; }
+.hero .lede { max-width: 62ch; color: var(--ink-2); font-size: 15.5px; }
+
+.hero-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.hero-facts b { color: var(--ink-2); font-weight: 500; }
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.section-head h2 { font-size: 15px; letter-spacing: -.005em; }
+.section-head .hint { font-size: 12.5px; color: var(--ink-3); }
+
+/* 세트 목록 — 카드가 아니라 행 */
+.setlist { display: flex; flex-direction: column; }
+
+.setrow {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+  padding: 20px 12px 20px 4px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  cursor: pointer;
+  transition: background .14s;
+}
+.setrow:hover { background: var(--surface-2); }
+.setrow:hover .setrow-go { color: var(--accent-ink); transform: translateX(2px); }
+
+.setrow-code {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--accent-ink);
+  padding-top: 3px;
+}
+.setrow-code .tag {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: .1em;
+  color: var(--ink-3);
+}
+
+.setrow-name { font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+.setrow-sum { margin-top: 4px; color: var(--ink-2); font-size: 13.5px; max-width: 58ch; }
+.setrow-detail { margin-top: 8px; color: var(--ink-3); font-size: 12.5px; max-width: 62ch; }
+
+.setrow-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  padding-top: 3px;
+}
+.setrow-meta .pace { color: var(--ink-3); font-size: 11px; }
+.setrow-go { color: var(--ink-3); font-size: 18px; transition: transform .14s, color .14s; }
+
+.setrow-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--good-ink);
+}
+
+/* 안내 패널 */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-sm);
+}
+.panel h3 { font-size: 13.5px; margin-bottom: 10px; }
+
+.steps { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; counter-reset: step; }
+.steps li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  counter-increment: step;
+}
+.steps li::before {
+  content: counter(step);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  border-radius: 50%;
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  margin-top: 1px;
+}
+.steps li b { color: var(--ink); font-weight: 600; }
+
+.home-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 44px; align-items: start; }
+@media (max-width: 860px) { .home-grid { grid-template-columns: 1fr; gap: 32px; } }
+
+.notice {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border-left: 2px solid var(--line-2);
+  background: var(--surface-2);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+
+/* 응시 기록 테이블 */
+.histtable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.histtable th {
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 0 10px 8px 0;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.histtable td { padding: 11px 10px 11px 0; border-bottom: 1px solid var(--line); color: var(--ink-2); }
+.histtable td:first-child { color: var(--ink); font-weight: 500; }
+.histtable .num { text-align: right; padding-right: 18px; }
+.histtable tbody tr:hover { background: var(--surface-2); }
+.linkbtn {
+  background: none; border: 0; padding: 0;
+  color: var(--accent-ink); font-size: 12.5px;
+  cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+}
+.empty { padding: 26px 0; color: var(--ink-3); font-size: 13px; }
+
+/* ---------- 응시 화면 ---------- */
+
+.progressbar { position: sticky; top: 54px; z-index: 19; height: 2px; background: var(--line); }
+.progressbar span { display: block; height: 100%; background: var(--accent); transition: width .25s ease; }
+
+.timer {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  letter-spacing: .02em;
+}
+.timer.warn { color: var(--warning-ink); }
+.timer.danger { color: var(--critical-ink); font-weight: 600; }
+
+.testhead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.testhead .pos { font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
+.testhead .pos b { color: var(--ink); font-size: 20px; font-weight: 600; }
+
+.qcard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.scalelegend {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 22px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.scalelegend .ends { display: flex; gap: 8px; align-items: center; }
+.scalelegend .ends span { width: 34px; text-align: center; }
+@media (max-width: 640px) { .scalelegend .ends { display: none; } }
+
+.stmt {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px 22px;
+  align-items: center;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+}
+.stmt-text { font-size: 15.5px; line-height: 1.55; letter-spacing: -.005em; }
+.stmt-tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-3);
+  margin-right: 9px;
+}
+@media (max-width: 640px) {
+  .stmt { grid-template-columns: 1fr; gap: 12px; padding: 16px; }
+}
+
+.scale { display: flex; gap: 6px; }
+.scale button {
+  width: 40px;
+  height: 40px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.scale button:hover { border-color: var(--accent); color: var(--accent-ink); }
+.scale button[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+@media (max-width: 640px) {
+  .scale { justify-content: space-between; }
+  .scale button { flex: 1; max-width: 58px; }
+}
+
+.forced {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px 22px;
+  background: var(--surface-2);
+}
+@media (max-width: 560px) { .forced { grid-template-columns: 1fr; } }
+
+.forced-group .label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.forced-group .label em { font-style: normal; color: var(--ink-2); }
+.pickrow { display: flex; gap: 6px; }
+.pickrow button {
+  flex: 1;
+  height: 36px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  color: var(--ink-2);
+  font-family: var(--mono);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, color .12s;
+}
+.pickrow button:hover { border-color: var(--ink-3); color: var(--ink); }
+.pickrow.most button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.pickrow.least button[aria-pressed="true"] { background: var(--series-2); border-color: var(--series-2); color: #fff; font-weight: 600; }
+
+.navrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+.navrow .spacer { flex: 1; }
+.navrow .status { font-size: 12.5px; color: var(--ink-3); }
+.navrow .status.incomplete { color: var(--warning-ink); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .14s, border-color .14s, opacity .14s;
+}
+.btn:hover { background: var(--surface-2); border-color: var(--ink-3); }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
+.btn-sm { height: 32px; padding: 0 12px; font-size: 12.5px; }
+
+.kbdhint { margin-top: 14px; font-size: 12px; color: var(--ink-3); }
+.kbdhint kbd {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: var(--r-sm);
+  padding: 1px 5px;
+  color: var(--ink-2);
+}
+
+/* ---------- 결과 ---------- */
+
+.verdict {
+  display: grid;
+  grid-template-columns: 6px minmax(0, 1fr);
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 14px;
+}
+.verdict .stripe { background: var(--good); }
+.verdict.is-warning .stripe { background: var(--warning); }
+.verdict.is-critical .stripe { background: var(--critical); }
+.verdict-body { padding: 20px 24px; display: grid; gap: 8px; }
+.verdict-title { display: flex; align-items: center; gap: 9px; font-size: 19px; font-weight: 600; letter-spacing: -.015em; }
+.verdict-title .ico { font-size: 15px; }
+.verdict p { color: var(--ink-2); font-size: 13.5px; max-width: 70ch; }
+.verdict-meta {
+  display: flex; flex-wrap: wrap; gap: 6px 20px;
+  font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+  padding-top: 4px;
+}
+
+.resgrid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+@media (max-width: 940px) { .resgrid { grid-template-columns: 1fr; } }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+.card-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  padding: 16px 20px 12px;
+}
+.card-head h2 { font-size: 14px; }
+.card-head .note { font-size: 11.5px; color: var(--ink-3); font-family: var(--mono); }
+.card-body { padding: 4px 20px 20px; }
+
+/* 역량 막대 */
+.bars { display: flex; flex-direction: column; }
+.bar-row {
+  display: grid;
+  grid-template-columns: 134px minmax(0, 1fr) 28px 32px;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-radius: var(--r-sm);
+}
+.bar-row:hover { background: var(--surface-2); }
+.bar-name { font-size: 12.5px; line-height: 1.32; color: var(--ink-2); }
+.bar-tag { font-family: var(--mono); font-size: 10px; color: var(--series-2); text-align: right; }
+.bar-track { position: relative; height: 16px; background: var(--surface-3); border-radius: 3px; }
+.bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 3px 4px 4px 3px; transition: width .5s cubic-bezier(.22,.8,.3,1); }
+.bar-mid { position: absolute; top: -3px; bottom: -3px; left: 50%; width: 1px; background: var(--line-2); }
+.bar-val { font-family: var(--mono); font-size: 12.5px; text-align: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+.bar-row.is-low .bar-fill { background: var(--series-2); }
+.bar-axis {
+  display: flex; justify-content: space-between;
+  margin-top: 6px; padding-left: 146px; padding-right: 84px;
+  font-family: var(--mono); font-size: 10.5px; color: var(--ink-3);
+}
+@media (max-width: 560px) {
+  .bar-row { grid-template-columns: 96px minmax(0, 1fr) 24px 28px; gap: 8px; }
+  .bar-name { font-size: 12px; }
+  .bar-axis { padding-left: 104px; padding-right: 60px; }
+}
+
+/* 레이더 */
+.radar-wrap { display: grid; gap: 12px; justify-items: center; }
+.radar-wrap svg { width: 100%; max-width: 460px; height: auto; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 7px; }
+
+/* 신뢰도 미터 */
+.meters { display: grid; gap: 18px; }
+.meter-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.meter-name { font-size: 13px; font-weight: 500; }
+.meter-val { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.meter-track { height: 8px; background: var(--surface-3); border-radius: 4px; margin-top: 7px; position: relative; overflow: hidden; }
+.meter-fill { position: absolute; inset: 0 auto 0 0; border-radius: 4px; transition: width .5s cubic-bezier(.22,.8,.3,1); }
+.meter-note { margin-top: 7px; font-size: 12px; color: var(--ink-2); }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 3px; border: 1px solid;
+}
+.chip.good     { color: var(--good-ink);     border-color: color-mix(in srgb, var(--good) 45%, transparent);     background: color-mix(in srgb, var(--good) 10%, transparent); }
+.chip.warning  { color: var(--warning-ink);  border-color: color-mix(in srgb, var(--warning) 55%, transparent);  background: color-mix(in srgb, var(--warning) 14%, transparent); }
+.chip.critical { color: var(--critical-ink); border-color: color-mix(in srgb, var(--critical) 45%, transparent); background: color-mix(in srgb, var(--critical) 10%, transparent); }
+
+/* 강점 / 보완 */
+.picks { display: grid; gap: 10px; }
+.pick {
+  display: grid;
+  grid-template-columns: 3px 1fr;
+  gap: 14px;
+  padding: 12px 0 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.pick:last-child { border-bottom: 0; }
+.pick .rail { background: var(--accent); border-radius: 2px; }
+.pick.is-gap .rail { background: var(--series-2); }
+.pick-name { font-size: 14px; font-weight: 600; display: flex; align-items: baseline; gap: 9px; }
+.pick-name .pct { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--ink-3); }
+.pick-desc { font-size: 12.5px; color: var(--ink-2); margin-top: 3px; }
+.pick-tip { font-size: 12.5px; color: var(--ink-2); margin-top: 7px; padding-left: 0; }
+.pick-tip b { color: var(--ink); font-weight: 600; }
+
+/* 예상 질문 */
+.qlist { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.qlist li { padding: 13px 0; border-bottom: 1px solid var(--line); display: grid; gap: 5px; }
+.qlist li:last-child { border-bottom: 0; }
+.qlist .q { font-size: 14px; letter-spacing: -.005em; }
+.qlist .why { font-size: 12px; color: var(--ink-3); }
+.qlist .why b { font-family: var(--mono); font-size: 11px; color: var(--ink-2); font-weight: 500; }
+
+/* 응답 분포 */
+.dist { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; align-items: end; height: 92px; }
+.dist-col { display: grid; align-content: end; gap: 6px; text-align: center; }
+.dist-bar { background: var(--accent); border-radius: 3px 3px 0 0; min-height: 2px; transition: height .5s cubic-bezier(.22,.8,.3,1); }
+.dist-lab { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+.dist-pct { font-family: var(--mono); font-size: 11px; color: var(--ink-2); }
+
+/* 문항 리뷰 */
+details.review { border-top: 1px solid var(--line); }
+details.review > summary {
+  list-style: none; cursor: pointer;
+  padding: 14px 20px;
+  font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+details.review > summary::-webkit-details-marker { display: none; }
+details.review > summary .caret { font-family: var(--mono); color: var(--ink-3); font-size: 12px; }
+details.review[open] > summary .caret { color: var(--accent-ink); }
+.reviewtable { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.reviewtable th {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3); text-align: left; font-weight: 500;
+  padding: 0 8px 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.reviewtable td { padding: 9px 8px 9px 0; border-bottom: 1px solid var(--line); color: var(--ink-2); vertical-align: top; }
+.reviewtable td.stmt-col { color: var(--ink); }
+.reviewtable .num { font-family: var(--mono); text-align: center; font-variant-numeric: tabular-nums; }
+.reviewtable .rev { color: var(--ink-3); font-family: var(--mono); font-size: 10.5px; }
+.tablescroll { overflow-x: auto; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(8px);
+  background: var(--ink); color: var(--page);
+  padding: 10px 18px; border-radius: var(--r-md);
+  font-size: 13px; box-shadow: var(--shadow-md);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+  z-index: 40;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.foot {
+  margin-top: 44px; padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 12px; color: var(--ink-3);
+  max-width: 74ch;
+}
+
+.stack { display: grid; gap: 20px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+</style>
+<noscript>
+  <div style="max-width:640px;margin:80px auto;padding:0 20px;font-family:system-ui,sans-serif;">
+    <h1 style="font-size:20px;">자바스크립트가 필요하다</h1>
+    <p>이 검사는 브라우저에서 직접 채점하기 때문에 자바스크립트를 켜야 응시할 수 있다. 응답은 서버로 전송되지 않는다.</p>
+  </div>
+</noscript>
+<script>
+/* SKCT 심층역량검사 시뮬레이터 — 문항 은행 및 검사 세트 정의
+ * 형식: [문항 텍스트, 채점 방향(+1 정방향 / -1 역방향)]
+ * 각 역량의 index 0-1, 8-9 쌍은 의도적인 유사 문항(응답 일관성 지표 산출용)이다.
+ * 실전 SKCT 심층역량검사를 참고해 자체 제작한 연습용 문항이며 기출 문항이 아니다.
+ */
+window.SKCT_DIMENSIONS = [
+  { code: "RESP", name: "성실·책임",        short: "성실",  desc: "맡은 일을 기한과 기준에 맞춰 끝까지 완수하는 성향" },
+  { code: "INIT", name: "주도·자발",        short: "주도",  desc: "지시 이전에 스스로 할 일을 찾아 움직이는 성향 (VWBE의 Voluntarily)" },
+  { code: "ACHV", name: "성취·목표지향",    short: "성취",  desc: "높은 기준을 세우고 결과로 증명하려는 성향" },
+  { code: "GRIT", name: "패기·끈기",        short: "패기",  desc: "어려운 상황에서도 물러서지 않고 지속하는 힘" },
+  { code: "COOP", name: "협업·팀워크",      short: "협업",  desc: "팀 전체 성과를 위해 협력하고 조율하는 성향" },
+  { code: "COMM", name: "소통·공감",        short: "소통",  desc: "상대의 의도를 읽고 자기 생각을 정확히 전달하는 능력" },
+  { code: "LEAD", name: "리더십·영향력",    short: "리더십", desc: "방향을 제시하고 사람을 움직여 결과를 만드는 성향" },
+  { code: "INNO", name: "도전·혁신",        short: "혁신",  desc: "익숙한 방식을 의심하고 새로운 시도를 감행하는 성향" },
+  { code: "ANLY", name: "분석·문제해결",    short: "분석",  desc: "근거와 구조를 갖고 문제의 원인에 접근하는 성향" },
+  { code: "STAB", name: "정서안정·스트레스내성", short: "안정", desc: "압박 상황에서 평정과 수행 수준을 유지하는 힘" },
+  { code: "ADPT", name: "적응·유연성",      short: "적응",  desc: "변화한 조건에 맞춰 방식을 바꾸고 빠르게 학습하는 성향" },
+  { code: "ETHC", name: "규범·윤리",        short: "윤리",  desc: "손해를 감수하더라도 원칙과 절차를 지키는 성향" }
+];
+
+window.SKCT_BANK = {
+  RESP: [
+    ["맡은 일은 마감보다 하루라도 먼저 끝내 둔다", 1],
+    ["해야 할 일은 기한이 오기 전에 미리 마무리해 둔다", 1],
+    ["약속한 일정은 웬만한 사정이 있어도 어기지 않는다", 1],
+    ["세부적인 부분까지 확인하고 나서야 일을 마무리한다", 1],
+    ["하기 싫은 일은 자꾸 뒤로 미루게 된다", -1],
+    ["일을 시작하기 전에 해야 할 항목을 정리해 둔다", 1],
+    ["마무리한 일보다 벌여 놓은 일이 많은 편이다", -1],
+    ["책임질 일이 생기면 부담스러워 한발 물러서게 된다", -1],
+    ["내 몫으로 정해진 일은 끝까지 책임지고 마친다", 1],
+    ["내가 맡기로 한 일은 어떤 상황에서도 끝을 본다", 1],
+    ["하루의 일정을 계획한 대로 지켜 나가는 편이다", 1],
+    ["작은 실수라도 그냥 넘어가지 않고 바로잡는다", 1],
+    ["정해진 절차를 건너뛰더라도 빨리 끝내는 쪽을 택한다", -1],
+    ["여러 일을 동시에 시작해 놓고 마무리를 못 할 때가 많다", -1],
+    ["맡은 업무의 진행 상황을 스스로 점검한다", 1],
+    ["누가 보지 않는 상황에서도 정해진 기준대로 일한다", 1]
+  ],
+  INIT: [
+    ["시키지 않아도 필요한 일을 먼저 찾아서 한다", 1],
+    ["지시를 받기 전에 스스로 할 일을 찾아 나선다", 1],
+    ["회의에서 먼저 의견을 꺼내는 편이다", 1],
+    ["새로운 프로젝트가 생기면 자원해서 참여한다", 1],
+    ["지시가 있을 때까지 기다리는 편이 안전하다고 생각한다", -1],
+    ["문제를 발견하면 내 담당이 아니어도 먼저 알린다", 1],
+    ["앞장서서 총대를 메는 일은 되도록 피하고 싶다", -1],
+    ["모임에서 궂은일을 먼저 맡는 편이다", 1],
+    ["누가 정해 주지 않아도 내 일의 우선순위를 스스로 정한다", 1],
+    ["일의 순서는 지시가 없어도 내가 판단해서 정한다", 1],
+    ["개선할 점이 보이면 내가 먼저 제안한다", 1],
+    ["남들이 움직인 다음에 따라 움직이는 편이다", -1],
+    ["필요하다면 다른 부서에 먼저 연락해 협조를 구한다", 1],
+    ["내가 맡은 일이 아니면 관여하지 않는다", -1],
+    ["일이 막히면 스스로 대안을 만들어 본다", 1],
+    ["주어진 범위를 넘어서까지 일을 찾아 하지는 않는다", -1]
+  ],
+  ACHV: [
+    ["남들보다 높은 목표를 세우고 도전한다", 1],
+    ["목표는 늘 달성 가능한 수준보다 높게 잡는다", 1],
+    ["결과가 기대에 못 미치면 원인을 끝까지 따져 본다", 1],
+    ["경쟁하는 상황이 되면 더 잘하고 싶어진다", 1],
+    ["적당히 해내는 정도면 충분하다고 생각한다", -1],
+    ["성과가 숫자로 확인될 때 만족감을 느낀다", 1],
+    ["1등이 아니어도 크게 아쉽지 않다", -1],
+    ["목표를 달성하기 위해 개인 시간을 쓰는 것은 아깝지 않다", 1],
+    ["일의 성과를 더 높이려고 스스로 기준을 올린다", 1],
+    ["지금 수준에 만족하지 않고 기준을 계속 높인다", 1],
+    ["짧은 기간 안에 눈에 띄는 성과를 내고 싶다", 1],
+    ["한 번 세운 목표는 웬만하면 수정 없이 밀어붙인다", 1],
+    ["성취보다 마음이 편한 상태가 더 중요하다", -1],
+    ["동료보다 앞서 나가고 싶은 마음이 크다", 1],
+    ["결과가 아쉬워도 과정이 즐거웠다면 그것으로 충분하다", -1],
+    ["목표를 달성하면 곧바로 다음 목표를 세운다", 1]
+  ],
+  GRIT: [
+    ["쉽게 풀리지 않는 일도 될 때까지 붙잡는다", 1],
+    ["잘 안 되는 일이라도 끝까지 손에서 놓지 않는다", 1],
+    ["실패해도 다시 시도하기까지 오래 걸리지 않는다", 1],
+    ["힘든 상황일수록 오히려 오기가 생긴다", 1],
+    ["가망이 없어 보이면 일찍 손을 떼는 편이다", -1],
+    ["오랜 기간 노력이 필요한 일도 지치지 않고 해낸다", 1],
+    ["지루한 일이 이어지면 금방 흥미를 잃는다", -1],
+    ["주변에서 말려도 옳다고 믿으면 밀고 나간다", 1],
+    ["어려운 목표일수록 끝까지 물고 늘어진다", 1],
+    ["난이도가 높은 일일수록 포기하지 않고 매달린다", 1],
+    ["몇 번 실패했다고 해서 방향을 바꾸지는 않는다", 1],
+    ["잘 안 될 것 같으면 빨리 다른 일을 찾는다", -1],
+    ["체력적으로 힘든 일정도 견뎌 낼 자신이 있다", 1],
+    ["거절이 반복되면 의욕이 크게 꺾인다", -1],
+    ["한 가지 일을 오래 파고드는 것을 좋아한다", 1],
+    ["결과가 늦게 나오는 일은 견디기 어렵다", -1]
+  ],
+  COOP: [
+    ["내 일이 끝나도 팀 일이 남아 있으면 돕는다", 1],
+    ["내 몫을 마쳐도 동료의 일이 남아 있으면 거든다", 1],
+    ["혼자 하는 것보다 함께 하는 편이 낫다고 생각한다", 1],
+    ["의견이 갈리면 내 주장을 굽힐 줄 안다", 1],
+    ["팀의 성과보다 내 개인 성과가 더 중요하다", -1],
+    ["동료의 부탁을 잘 들어주는 편이다", 1],
+    ["협업할 때 다른 사람에게 맞추는 일이 피곤하다", -1],
+    ["성과의 공을 나누는 데 인색하지 않다", 1],
+    ["팀 전체의 결과를 위해 내 몫을 양보할 수 있다", 1],
+    ["팀이 잘되기 위해서라면 내 이익은 뒤로 미룰 수 있다", 1],
+    ["역할이 애매한 일은 서로 미루기보다 내가 맡는다", 1],
+    ["다른 사람과 함께 일하면 오히려 속도가 떨어진다고 느낀다", -1],
+    ["동료가 실수했을 때 함께 수습한다", 1],
+    ["팀 활동이나 모임에는 되도록 빠지려 한다", -1],
+    ["서로 다른 입장을 조율하는 역할을 잘한다", 1],
+    ["각자 자기 일만 제대로 하면 된다고 생각한다", -1]
+  ],
+  COMM: [
+    ["상대의 말을 끝까지 듣고 나서 내 말을 한다", 1],
+    ["말을 중간에 끊지 않고 상대의 이야기를 끝까지 듣는다", 1],
+    ["복잡한 내용을 알기 쉽게 풀어서 설명하는 편이다", 1],
+    ["상대의 표정이나 말투에서 감정을 잘 읽는다", 1],
+    ["다른 사람의 고민을 들어 주는 일이 부담스럽다", -1],
+    ["처음 만난 사람과도 자연스럽게 대화한다", 1],
+    ["내 생각을 말로 표현하는 데 시간이 걸린다", -1],
+    ["하기 어려운 이야기도 상대가 상하지 않게 전한다", 1],
+    ["상대가 왜 그렇게 느끼는지 헤아려 보려 한다", 1],
+    ["상대의 입장이 되어 그 감정을 이해하려 애쓴다", 1],
+    ["여러 사람 앞에서 발표하는 일이 어렵지 않다", 1],
+    ["오해가 생기면 내가 먼저 연락해 풀려고 한다", 1],
+    ["말수가 적어서 오해를 사는 편이다", -1],
+    ["글이나 자료로 내용을 정확하게 전달한다", 1],
+    ["감정이 오가는 대화는 되도록 피한다", -1],
+    ["상대가 이해했는지 확인해 가며 이야기한다", 1]
+  ],
+  LEAD: [
+    ["여러 사람이 모이면 방향을 제시하는 편이다", 1],
+    ["모임에서 일의 방향을 정하는 역할을 자주 맡는다", 1],
+    ["다른 사람을 설득해 움직이게 하는 데 자신이 있다", 1],
+    ["결정을 내려야 할 때 미루지 않는다", 1],
+    ["책임자 자리는 부담스러워서 피하고 싶다", -1],
+    ["팀원의 강점을 파악해 알맞은 역할을 맡긴다", 1],
+    ["다른 사람을 이끄는 일보다 따르는 편이 마음 편하다", -1],
+    ["반대 의견이 있어도 필요한 결정은 내린다", 1],
+    ["사람들이 내 의견을 따르는 경우가 많다", 1],
+    ["내가 낸 의견대로 일이 진행되는 경우가 잦다", 1],
+    ["구성원의 사기를 끌어올리려고 애쓴다", 1],
+    ["갈등이 생기면 중재하는 역할을 맡는다", 1],
+    ["남들 앞에 서는 자리는 되도록 사양한다", -1],
+    ["일의 전체 그림을 그리고 역할을 나눈다", 1],
+    ["내가 내린 결정의 결과를 책임지는 것이 두렵다", -1],
+    ["후배나 동료의 성장을 챙기는 편이다", 1]
+  ],
+  INNO: [
+    ["늘 하던 방식보다 새로운 방식을 시도한다", 1],
+    ["익숙한 방법 대신 새로운 방법을 먼저 시도해 본다", 1],
+    ["낯선 분야의 일도 흥미롭게 느낀다", 1],
+    ["실패할 가능성이 있어도 새로운 시도를 해 본다", 1],
+    ["검증된 방법이 아니면 손대지 않는다", -1],
+    ["남들이 생각하지 못한 아이디어를 잘 낸다", 1],
+    ["변화가 잦은 환경은 피곤하게 느껴진다", -1],
+    ["일하는 방식을 자주 개선해 본다", 1],
+    ["해 보지 않은 방식이라도 가능성이 있으면 도전한다", 1],
+    ["경험해 본 적 없는 방식이라도 될 것 같으면 시도한다", 1],
+    ["관행이라는 이유만으로 유지되는 것에 의문을 갖는다", 1],
+    ["새로운 도구나 기술을 빨리 익혀서 써 본다", 1],
+    ["결과를 예측할 수 없는 일은 시작하지 않는다", -1],
+    ["기존의 규칙을 다시 설계해 보는 일이 즐겁다", 1],
+    ["모험보다는 안정을 택하는 편이다", -1],
+    ["여러 아이디어를 조합해 새로운 안을 만든다", 1]
+  ],
+  ANLY: [
+    ["문제가 생기면 원인부터 따져 본다", 1],
+    ["일이 잘못되면 먼저 그 원인을 분석한다", 1],
+    ["결정할 때 근거가 되는 자료를 찾아본다", 1],
+    ["복잡한 상황을 항목별로 정리해 본다", 1],
+    ["직감으로 판단하고 넘어가는 편이다", -1],
+    ["숫자나 데이터를 다루는 일이 어렵지 않다", 1],
+    ["하나하나 따져 보는 일이 번거롭게 느껴진다", -1],
+    ["결론을 내리기 전에 반대되는 근거도 살핀다", 1],
+    ["판단을 내릴 때 사실과 근거를 먼저 확인한다", 1],
+    ["결정하기 전에 관련된 사실을 충분히 확인한다", 1],
+    ["여러 대안을 비교해 장단점을 정리한다", 1],
+    ["패턴이나 규칙을 찾아내는 일을 잘한다", 1],
+    ["자세히 분석하기보다 빨리 결정하는 쪽을 택한다", -1],
+    ["세운 가정이 맞는지 다시 점검한다", 1],
+    ["긴 자료를 읽고 핵심을 뽑아내는 일이 힘들다", -1],
+    ["문제를 작은 단위로 쪼개어 접근한다", 1]
+  ],
+  STAB: [
+    ["압박이 심한 상황에서도 평소처럼 일한다", 1],
+    ["긴장되는 상황에서도 평소의 실력을 그대로 낸다", 1],
+    ["실수를 오래 마음에 담아 두지 않는다", 1],
+    ["예상치 못한 문제가 생겨도 침착함을 유지한다", 1],
+    ["사소한 일에도 쉽게 짜증이 난다", -1],
+    ["잠을 설칠 만큼 일 걱정을 하는 경우는 드물다", 1],
+    ["비판을 들으면 한동안 기분이 가라앉는다", -1],
+    ["감정을 겉으로 드러내지 않고 조절한다", 1],
+    ["급한 일이 몰려도 크게 흔들리지 않는다", 1],
+    ["일이 한꺼번에 밀려와도 마음이 크게 요동치지 않는다", 1],
+    ["화가 나도 상황이 지나면 금방 회복한다", 1],
+    ["결과를 기다리는 동안 초조해서 다른 일이 손에 잡히지 않는다", -1],
+    ["긴장하면 평소보다 실수가 잦아진다", -1],
+    ["부담이 큰 발표를 앞두고도 컨디션을 유지한다", 1],
+    ["걱정이 많아서 미리부터 지치는 편이다", -1],
+    ["어려운 상황에서도 감정보다 해야 할 일을 먼저 본다", 1]
+  ],
+  ADPT: [
+    ["새로운 환경에 빨리 적응하는 편이다", 1],
+    ["낯선 환경에도 금방 익숙해진다", 1],
+    ["계획이 바뀌어도 크게 개의치 않는다", 1],
+    ["처음 해 보는 업무도 배워 가며 해낸다", 1],
+    ["익숙한 방식이 바뀌면 능률이 크게 떨어진다", -1],
+    ["여러 일을 상황에 맞게 바꿔 가며 처리한다", 1],
+    ["내 방식이 옳다고 생각하면 잘 바꾸지 않는다", -1],
+    ["새로 배우는 것에 거부감이 없다", 1],
+    ["상황이 달라지면 방법도 바꿔서 대응한다", 1],
+    ["조건이 변하면 내 방식도 그에 맞게 고친다", 1],
+    ["다양한 성향의 사람들과 무리 없이 어울린다", 1],
+    ["피드백을 받으면 바로 반영해 본다", 1],
+    ["예정에 없던 요청이 들어오면 당황한다", -1],
+    ["부서나 역할이 바뀌어도 잘 해낼 자신이 있다", 1],
+    ["정해진 틀 안에서 일할 때 가장 편하다", -1],
+    ["모르는 분야는 자료를 찾아 스스로 익힌다", 1]
+  ],
+  ETHC: [
+    ["손해를 보더라도 원칙은 지킨다", 1],
+    ["불이익이 생기더라도 정해진 원칙을 따른다", 1],
+    ["규정은 상황에 따라 융통성 있게 해석해도 된다", -1],
+    ["잘못된 점을 알게 되면 감추지 않고 알린다", 1],
+    ["작은 거짓말은 필요하면 할 수 있다고 본다", -1],
+    ["회사 물품을 개인적인 용도로 쓰지 않는다", 1],
+    ["결과가 좋다면 과정은 크게 문제되지 않는다", -1],
+    ["내 실수는 먼저 인정하고 밝힌다", 1],
+    ["규칙을 어기는 일은 어떤 이유로도 하지 않는다", 1],
+    ["어떤 사정이 있어도 정해진 규칙은 어기지 않는다", 1],
+    ["동료의 부정을 알게 되면 모른 척하지 않는다", 1],
+    ["보고할 때 나에게 불리한 내용도 그대로 전한다", 1],
+    ["관행이라면 규정에 어긋나도 따를 수 있다", -1],
+    ["공과 사를 분명하게 구분한다", 1],
+    ["급한 상황에서는 절차를 생략할 수도 있다고 본다", -1],
+    ["사소한 약속이라도 지킨다", 1]
+  ],
+  SD: [
+    ["지금까지 살면서 단 한 번도 거짓말을 한 적이 없다", 1],
+    ["누군가를 미워해 본 적이 한 번도 없다", 1],
+    ["약속 시간에 늦은 적이 단 한 번도 없다", 1],
+    ["화를 내 본 적이 한 번도 없다", 1],
+    ["다른 사람의 험담을 해 본 적이 전혀 없다", 1],
+    ["규칙을 어겨 본 적이 평생 한 번도 없다", 1],
+    ["귀찮다는 이유로 할 일을 미룬 적이 한 번도 없다", 1],
+    ["다른 사람을 부러워한 적이 전혀 없다", 1],
+    ["내 이익을 먼저 생각한 적이 한 번도 없다", 1],
+    ["손해 보는 일에도 늘 기꺼이 나섰다", 1],
+    ["누구에게도 짜증을 낸 적이 없다", 1],
+    ["지금까지 후회할 만한 선택을 한 적이 전혀 없다", 1]
+  ]
+};
+
+/* 검사 세트 정의
+ * pools: [역량코드, 시작 index, 끝 index(미포함)] — 은행에서 잘라 쓸 구간
+ * groups: 문항군 수 (문항군 1개 = 문장 3개)
+ * minutes: 권장 제한 시간
+ */
+window.SKCT_SETS = [
+  {
+    id: "full-a", code: "SET A", name: "실전 모의 A형",
+    tag: "실전", groups: 34, minutes: 15, seed: 10427,
+    summary: "12개 역량 전 영역을 고르게 다루는 표준 실전형. 처음 응시한다면 이 세트부터.",
+    detail: "역량별 전반부 문항과 과장응답 문항 6개로 구성된다. 유사 문항 12쌍이 흩어져 있어 응답 일관성 지표가 가장 정확하게 나온다.",
+    pools: [["RESP",0,8],["INIT",0,8],["ACHV",0,8],["GRIT",0,8],["COOP",0,8],["COMM",0,8],["LEAD",0,8],["INNO",0,8],["ANLY",0,8],["STAB",0,8],["ADPT",0,8],["ETHC",0,8],["SD",0,6]]
+  },
+  {
+    id: "full-b", code: "SET B", name: "실전 모의 B형",
+    tag: "실전", groups: 34, minutes: 15, seed: 20831,
+    summary: "A형과 문항이 전혀 겹치지 않는 두 번째 실전형. 재응시 시 프로파일이 재현되는지 확인용.",
+    detail: "A형과 같은 12역량·같은 구조이지만 문항은 후반부에서만 뽑는다. 두 세트의 결과 차이가 크면 응답이 상황에 따라 흔들린다는 신호다.",
+    pools: [["RESP",8,16],["INIT",8,16],["ACHV",8,16],["GRIT",8,16],["COOP",8,16],["COMM",8,16],["LEAD",8,16],["INNO",8,16],["ANLY",8,16],["STAB",8,16],["ADPT",8,16],["ETHC",8,16],["SD",6,12]]
+  },
+  {
+    id: "quick", code: "SET C", name: "10분 속성 진단",
+    tag: "속성", groups: 18, minutes: 8, seed: 33119,
+    summary: "시험 직전 컨디션 점검용 축약형. 프로파일의 큰 윤곽과 응답 습관만 빠르게 본다.",
+    detail: "역량당 4문항으로 줄인 대신 문항군당 시간을 실전보다 짧게 잡았다. 백분위는 참고치로만 보고, 강점·보완 순위 위주로 읽는 것이 좋다.",
+    pools: [["RESP",0,4],["INIT",0,4],["ACHV",0,4],["GRIT",0,4],["COOP",0,4],["COMM",0,4],["LEAD",0,4],["INNO",0,4],["ANLY",0,4],["STAB",0,4],["ADPT",0,4],["ETHC",0,4],["SD",0,6]]
+  },
+  {
+    id: "core", code: "SET D", name: "핵심역량 집중 (VWBE·패기)",
+    tag: "집중", groups: 24, minutes: 11, seed: 47653,
+    summary: "SK가 특히 크게 보는 자발성·성취·패기·협업·리더십에 문항을 몰아넣은 세트.",
+    detail: "주도, 성취, 패기, 협업, 리더십, 성실 6개 역량만 다룬다. 실제 면접에서 근거를 요구받기 쉬운 영역이므로, 낮게 나온 역량은 경험 사례를 미리 정리해 두는 것이 좋다.",
+    pools: [["RESP",0,12],["INIT",0,12],["ACHV",0,12],["GRIT",0,12],["COOP",0,12],["LEAD",0,12]]
+  },
+  {
+    id: "stress", code: "SET E", name: "압박·신뢰도 집중",
+    tag: "집중", groups: 26, minutes: 10, seed: 58201,
+    summary: "과장응답 문항 12개를 모두 넣은 세트. 꾸며서 답할 때 지표가 어떻게 무너지는지 확인할 수 있다.",
+    detail: "정서안정, 적응, 윤리, 성실, 소통을 다루면서 과장응답 문항 12개 전부와 유사 문항 쌍을 집중 배치했다. 시간도 문항군당 23초로 가장 빠듯하게 잡혀 있다.",
+    pools: [["STAB",0,16],["ADPT",0,16],["ETHC",0,16],["RESP",0,8],["COMM",0,10],["SD",0,12]]
+  }
+];
+
+</script>
+<script>
+/* SKCT 심층역량검사 시뮬레이터 — 애플리케이션 로직 */
+(function () {
+  "use strict";
+
+  var DIMS = window.SKCT_DIMENSIONS;
+  var BANK = window.SKCT_BANK;
+  var SETS = window.SKCT_SETS;
+
+  var DIM_BY_CODE = {};
+  DIMS.forEach(function (d) { DIM_BY_CODE[d.code] = d; });
+
+  var CORE_DIMS = ["INIT", "ACHV", "GRIT", "COOP", "RESP"];
+  var SCALE_LABELS = ["전혀 그렇지 않다", "그렇지 않다", "보통이다", "그렇다", "매우 그렇다"];
+  var MARKS = ["A", "B", "C"];
+
+  /* 규준 파라미터 — 실제 SK 규준이 아니라 연습용 시뮬레이션 규준이다. */
+  var NORM_MEAN = 3.35;
+  var NORM_SD = 0.55;
+
+  var COACH = {
+    RESP: {
+      gap: "기한과 절차를 지킨 근거가 약하게 잡혔다. 일정을 어떻게 쪼개고 언제 점검하는지 한 문장으로 정리해 두면 면접에서 바로 쓸 수 있다.",
+      good: "약속한 기한과 기준을 지키는 성향이 뚜렷하다. '무엇을 언제 점검했는지'까지 말해야 근거로 인정된다.",
+      q: "기한을 맞추기 어려웠던 일을 끝까지 마무리한 경험을 말해 보세요."
+    },
+    INIT: {
+      gap: "지시 전에 먼저 움직인 흔적이 잘 드러나지 않았다. SK가 말하는 VWBE의 앞 절반에 해당하는 영역이라 비중이 크다.",
+      good: "자발성(Voluntarily)이 강하게 잡혔다. 내가 먼저 제안해서 바뀐 것 한 가지를 결과까지 붙여 준비해 두자.",
+      q: "누가 시키지 않았는데 먼저 나서서 한 일이 있다면 무엇인가요?"
+    },
+    ACHV: {
+      gap: "목표 수준을 낮게 잡는 쪽으로 응답이 쏠렸다. 스스로 기준을 올려 본 경험을 숫자와 함께 준비하자.",
+      good: "높은 기준을 스스로 세우는 성향이다. 목표치와 실제 결과를 숫자로 말할 수 있어야 설득력이 붙는다.",
+      q: "스스로 세운 목표 가운데 가장 높았던 것은 무엇이고, 결과는 어땠나요?"
+    },
+    GRIT: {
+      gap: "잘 풀리지 않을 때 방향을 빨리 트는 편으로 읽힌다. 오래 붙잡아 끝낸 경험을 기간과 함께 준비하자.",
+      good: "SK가 말하는 '패기'에 직접 닿는 영역이 강하게 나왔다. 포기하고 싶었던 지점을 함께 말하면 더 진짜처럼 들린다.",
+      q: "가장 오래 매달렸던 일과, 중간에 그만두고 싶었던 순간을 말해 보세요."
+    },
+    COOP: {
+      gap: "팀 성과보다 개인 성과를 앞에 두는 응답이 많았다. 양보하거나 남의 몫을 대신 떠안은 사례가 필요하다.",
+      good: "팀 전체를 먼저 보는 성향이다. 다만 '양보만 한 사람'으로 보이지 않게, 그 결과 팀이 무엇을 얻었는지 붙이자.",
+      q: "팀을 위해 내 몫의 손해를 감수했던 경험이 있나요?"
+    },
+    COMM: {
+      gap: "듣기와 전달 항목이 낮게 잡혔다. 하기 어려운 이야기를 상대가 상하지 않게 전한 사례를 준비하자.",
+      good: "상대의 의도를 읽고 정확히 전달하는 힘이 있다. 갈등 상황을 말로 풀어낸 사례가 잘 맞는다.",
+      q: "의견이 다른 상대를 설득했던 경험을 말해 보세요."
+    },
+    LEAD: {
+      gap: "앞에 서는 역할을 피하는 응답 경향이 보인다. 규모가 작아도 방향을 정하고 역할을 나눈 경험이면 충분하다.",
+      good: "방향을 제시하고 결정을 내리는 성향이다. 결정의 결과까지 책임진 부분을 말해야 리더십으로 읽힌다.",
+      q: "팀을 이끌면서 내렸던 가장 어려운 결정은 무엇이었나요?"
+    },
+    INNO: {
+      gap: "검증된 방식을 선호하는 쪽으로 치우쳤다. 기존 방식을 바꿔 본 작은 사례라도 하나 준비해 두자.",
+      good: "익숙한 방식을 의심하고 바꿔 보는 성향이다. 다만 무모함이 아니라 근거 있는 시도였음을 함께 보여야 한다.",
+      q: "늘 하던 방식을 바꿔 본 경험과 그 결과를 말해 보세요."
+    },
+    ANLY: {
+      gap: "근거보다 직감으로 판단한다는 응답이 많았다. 자료나 수치로 원인을 짚어낸 경험을 정리해 두자.",
+      good: "근거를 갖고 원인에 접근하는 성향이다. 인지역량 결과와 함께 읽힐 때 특히 강점으로 잡힌다.",
+      q: "원인을 잘못 짚었다가 바로잡았던 경험이 있나요?"
+    },
+    STAB: {
+      gap: "압박 상황에서 흔들린다는 응답이 누적됐다. 이 영역이 낮으면 조직적합 판단에서 특히 크게 걸린다.",
+      good: "압박 상황에서 수행 수준을 유지하는 힘이 있다. 실제로 가장 급했던 순간을 사례로 준비해 두자.",
+      q: "압박이 가장 컸던 순간에 어떻게 대처했는지 말해 보세요."
+    },
+    ADPT: {
+      gap: "익숙한 틀 안에서 일할 때 편하다는 응답이 많았다. 환경이 바뀐 뒤 빠르게 익힌 사례가 필요하다.",
+      good: "변화한 조건에 맞춰 방식을 바꾸는 성향이다. 무엇을 어떻게 새로 배웠는지가 핵심이다.",
+      q: "완전히 새로운 환경에 적응해야 했던 경험을 말해 보세요."
+    },
+    ETHC: {
+      gap: "결과를 위해 절차를 유연하게 봐도 된다는 응답이 섞였다. 인적성에서 이 영역의 낮은 점수는 가장 치명적으로 읽힌다.",
+      good: "원칙과 절차를 지키는 성향이 분명하다. 손해를 감수하고 지킨 사례가 있으면 그대로 쓰면 된다.",
+      q: "원칙과 성과가 충돌했던 상황에서 어떻게 판단했나요?"
+    }
+  };
+
+  /* ---------------- 유틸 ---------------- */
+
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (k) {
+        if (k === "class") node.className = attrs[k];
+        else if (k === "text") node.textContent = attrs[k];
+        else if (k === "html") node.innerHTML = attrs[k];
+        else if (k.slice(0, 2) === "on") node.addEventListener(k.slice(2), attrs[k]);
+        else if (attrs[k] !== null && attrs[k] !== undefined) node.setAttribute(k, attrs[k]);
+      });
+    }
+    (children || []).forEach(function (c) {
+      if (c === null || c === undefined) return;
+      node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    });
+    return node;
+  }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function mmss(sec) {
+    sec = Math.max(0, Math.round(sec));
+    return pad2(Math.floor(sec / 60)) + ":" + pad2(sec % 60);
+  }
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function erf(x) {
+    var s = x < 0 ? -1 : 1;
+    x = Math.abs(x);
+    var t = 1 / (1 + 0.3275911 * x);
+    var y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+    return s * y;
+  }
+  function percentileOf(raw) {
+    var z = (raw - NORM_MEAN) / NORM_SD;
+    return clamp(Math.round(50 * (1 + erf(z / Math.SQRT2))), 1, 99);
+  }
+  function bandOf(pct) {
+    if (pct >= 85) return "매우 높음";
+    if (pct >= 65) return "높음";
+    if (pct >= 35) return "보통";
+    if (pct >= 15) return "낮음";
+    return "매우 낮음";
+  }
+  function store(key, val) {
+    try {
+      if (val === undefined) {
+        var raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+      }
+      if (val === null) localStorage.removeItem(key);
+      else localStorage.setItem(key, JSON.stringify(val));
+    } catch (e) { /* 사생활 보호 모드 등 — 저장 없이 계속 진행 */ }
+    return null;
+  }
+
+  var K_SESSION = "skct.v1.session";
+  var K_HISTORY = "skct.v1.history";
+  var K_THEME = "skct.v1.theme";
+
+  /* ---------------- 검사지 조립 ---------------- */
+
+  function itemId(dim, idx) { return dim + pad2(idx); }
+
+  function buildSet(def) {
+    var rnd = mulberry32(def.seed);
+    var buckets = {};
+    def.pools.forEach(function (p) {
+      var dim = p[0];
+      buckets[dim] = buckets[dim] || [];
+      for (var i = p[1]; i < p[2]; i++) {
+        buckets[dim].push({
+          id: itemId(dim, i),
+          dim: dim,
+          idx: i,
+          text: BANK[dim][i][0],
+          key: BANK[dim][i][1],
+          isSD: dim === "SD"
+        });
+      }
+    });
+    Object.keys(buckets).forEach(function (dim) {
+      var arr = buckets[dim];
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(rnd() * (i + 1));
+        var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+      }
+    });
+
+    /* 남은 문항이 많은 역량부터 3개씩 뽑아 문항군을 만든다 — 한 문항군 안에 같은 역량이 겹치지 않는다. */
+    var groups = [];
+    while (groups.length < def.groups) {
+      var dims = Object.keys(buckets).filter(function (d) { return buckets[d].length > 0; });
+      if (dims.length === 0) break;
+      dims.sort(function (a, b) {
+        var diff = buckets[b].length - buckets[a].length;
+        return diff !== 0 ? diff : (rnd() - 0.5);
+      });
+      var picked = [];
+      for (var k = 0; k < 3 && k < dims.length; k++) picked.push(buckets[dims[k]].pop());
+      while (picked.length < 3 && dims.length) {
+        var d2 = dims.find(function (d) { return buckets[d].length > 0; });
+        if (!d2) break;
+        picked.push(buckets[d2].pop());
+      }
+      if (picked.length < 3) break;
+      for (var m = picked.length - 1; m > 0; m--) {
+        var n = Math.floor(rnd() * (m + 1));
+        var tmp = picked[m]; picked[m] = picked[n]; picked[n] = tmp;
+      }
+      groups.push(picked);
+    }
+
+    /* 유사 문항 쌍 — 은행에서 (00,01), (08,09) 위치가 서로 바꿔 쓴 표현이다. */
+    var present = {};
+    groups.forEach(function (g) { g.forEach(function (it) { present[it.id] = true; }); });
+    var pairs = [];
+    Object.keys(BANK).forEach(function (dim) {
+      if (dim === "SD") return;
+      [[0, 1], [8, 9]].forEach(function (p) {
+        var a = itemId(dim, p[0]), b = itemId(dim, p[1]);
+        if (present[a] && present[b]) pairs.push([a, b, dim]);
+      });
+    });
+    return { groups: groups, pairs: pairs };
+  }
+
+  var SHEETS = {};
+  function sheetFor(setId) {
+    if (!SHEETS[setId]) {
+      var def = SETS.filter(function (s) { return s.id === setId; })[0];
+      SHEETS[setId] = buildSet(def);
+    }
+    return SHEETS[setId];
+  }
+  function setDef(setId) { return SETS.filter(function (s) { return s.id === setId; })[0]; }
+
+  /* ---------------- 채점 ---------------- */
+
+  function scored(item, rating) { return item.key > 0 ? rating : 6 - rating; }
+
+  function computeResult(session) {
+    var def = setDef(session.setId);
+    var sheet = sheetFor(session.setId);
+    var answers = session.answers || {};
+    var picks = session.picks || {};
+
+    var byDim = {}, fcAdj = {}, counts = [0, 0, 0, 0, 0];
+    var totalStmts = 0, answered = 0, sdRatings = [];
+
+    sheet.groups.forEach(function (group, gi) {
+      var pick = picks[gi] || {};
+      group.forEach(function (item) {
+        totalStmts++;
+        var r = answers[item.id];
+        if (r) {
+          answered++;
+          counts[r - 1]++;
+          if (item.isSD) sdRatings.push(r);
+          else {
+            byDim[item.dim] = byDim[item.dim] || [];
+            byDim[item.dim].push(scored(item, r));
+          }
+        }
+        if (!item.isSD) {
+          fcAdj[item.dim] = fcAdj[item.dim] || 0;
+          if (pick.most === item.id) fcAdj[item.dim] += 0.55;
+          if (pick.least === item.id) fcAdj[item.dim] -= 0.55;
+        }
+      });
+    });
+
+    var pickedGroups = 0;
+    sheet.groups.forEach(function (g, gi) {
+      var p = picks[gi] || {};
+      if (p.most && p.least) pickedGroups++;
+    });
+
+    var dimResults = DIMS.map(function (d) {
+      var vals = byDim[d.code] || [];
+      if (!vals.length) return null;
+      var mean = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
+      var raw = clamp(mean + (fcAdj[d.code] || 0) / vals.length, 1, 5);
+      var pct = percentileOf(raw);
+      return {
+        code: d.code, name: d.name, short: d.short, desc: d.desc,
+        n: vals.length, raw: Math.round(raw * 100) / 100,
+        score: Math.round((raw - 1) / 4 * 1000) / 10,
+        percentile: pct, band: bandOf(pct)
+      };
+    }).filter(Boolean);
+
+    /* 신뢰도 1 — 과장응답(사회적 바람직성) */
+    var sdMean = sdRatings.length
+      ? sdRatings.reduce(function (a, b) { return a + b; }, 0) / sdRatings.length : null;
+    var sdRisk = sdMean === null ? null : Math.round((sdMean - 1) / 4 * 100);
+    var sdLevel = sdRisk === null ? "good" : (sdRisk > 62 ? "critical" : sdRisk >= 35 ? "warning" : "good");
+
+    /* 신뢰도 2 — 유사 문항 응답 일관성 */
+    var diffs = [], pairDetail = [];
+    sheet.pairs.forEach(function (p) {
+      var ra = answers[p[0]], rb = answers[p[1]];
+      if (!ra || !rb) return;
+      var d = Math.abs(ra - rb);
+      diffs.push(d);
+      pairDetail.push({ dim: p[2], a: p[0], b: p[1], ra: ra, rb: rb, diff: d });
+    });
+    var consistency = diffs.length
+      ? Math.round((1 - (diffs.reduce(function (a, b) { return a + b; }, 0) / diffs.length) / 4) * 100) : null;
+    var consLevel = consistency === null ? "good" : (consistency < 66 ? "critical" : consistency < 80 ? "warning" : "good");
+
+    /* 신뢰도 3 — 응답 편향 */
+    var extremePct = answered ? (counts[0] + counts[4]) / answered * 100 : 0;
+    var middlePct = answered ? counts[2] / answered * 100 : 0;
+    var balance = Math.round(clamp(100 - Math.max(0, extremePct - 50) * 1.6 - Math.max(0, middlePct - 40) * 1.8, 0, 100));
+    var balLevel = balance < 55 ? "critical" : balance < 75 ? "warning" : "good";
+
+    var completion = totalStmts ? Math.round(answered / totalStmts * 100) : 0;
+    var pickCompletion = sheet.groups.length ? Math.round(pickedGroups / sheet.groups.length * 100) : 0;
+
+    var verdict;
+    if (completion < 95 || pickCompletion < 90) {
+      verdict = {
+        level: "critical", ico: "●",
+        title: "미완료 응답 — 결과 해석 보류",
+        text: "실제 검사에서는 미응답 문항이 그대로 결측으로 남고, 결측이 많으면 프로파일 자체를 신뢰하지 않는다. 시간 배분을 다시 잡고 전 문항을 채운 뒤 읽는 것이 맞다."
+      };
+    } else if (sdLevel === "critical" || consLevel === "critical") {
+      verdict = {
+        level: "critical", ico: "●",
+        title: "신뢰도 지표 경고 — 응답 방식 점검 필요",
+        text: sdLevel === "critical"
+          ? "과장응답 지표가 임계치를 넘었다. 좋아 보이는 쪽으로 답을 몰면 실제 검사에서는 '왜곡 응답'으로 분류되어 역량 점수와 무관하게 불리해진다."
+          : "유사 문항 쌍에서 응답이 크게 엇갈렸다. 문항을 꾸며서 답하거나 급하게 찍었을 때 나오는 전형적인 패턴이다."
+      };
+    } else if (sdLevel === "warning" || consLevel === "warning" || balLevel !== "good") {
+      verdict = {
+        level: "warning", ico: "▲",
+        title: "대체로 양호 — 응답 습관만 다듬으면 된다",
+        text: "역량 프로파일은 읽을 수 있는 수준이다. 다만 아래 신뢰도 지표 중 하나가 주의 구간에 있으니, 내일 실전에서는 해당 습관만 의식하면 된다."
+      };
+    } else {
+      verdict = {
+        level: "good", ico: "✓",
+        title: "신뢰할 수 있는 응답",
+        text: "세 가지 신뢰도 지표가 모두 양호 구간이다. 이 상태의 프로파일은 그대로 읽어도 된다. 아래 강점과 보완 영역을 면접 답변 준비의 기준으로 삼자."
+      };
+    }
+
+    var sortedByPct = dimResults.slice().sort(function (a, b) { return b.percentile - a.percentile; });
+    var coreVals = dimResults.filter(function (d) { return CORE_DIMS.indexOf(d.code) >= 0; });
+    var coreAvg = coreVals.length
+      ? Math.round(coreVals.reduce(function (a, b) { return a + b.percentile; }, 0) / coreVals.length) : null;
+
+    return {
+      version: 1,
+      setId: session.setId,
+      setName: def.name,
+      setCode: def.code,
+      finishedAt: session.finishedAt || Date.now(),
+      elapsedSec: session.elapsedSec || 0,
+      limitSec: def.minutes * 60,
+      totalStatements: totalStmts,
+      answeredStatements: answered,
+      completion: completion,
+      pickCompletion: pickCompletion,
+      dimensions: dimResults,
+      strengths: sortedByPct.slice(0, 3),
+      gaps: sortedByPct.slice(-3).reverse(),
+      coreAverage: coreAvg,
+      reliability: {
+        socialDesirability: { value: sdRisk, level: sdLevel, n: sdRatings.length },
+        consistency: { value: consistency, level: consLevel, n: diffs.length, pairs: pairDetail },
+        responseBalance: { value: balance, level: balLevel, extremePct: Math.round(extremePct), middlePct: Math.round(middlePct) }
+      },
+      distribution: counts,
+      verdict: verdict,
+      norm: { mean: NORM_MEAN, sd: NORM_SD, note: "연습용 시뮬레이션 규준 — 실제 SK 규준이 아니다" }
+    };
+  }
+
+  /* ---------------- 상태 ---------------- */
+
+  var state = { screen: "home", session: null, result: null, timerId: null };
+
+  function newSession(setId) {
+    return {
+      setId: setId, index: 0, answers: {}, picks: {},
+      startedAt: Date.now(), carryMs: 0, elapsedSec: 0, finishedAt: null
+    };
+  }
+  function saveSession() {
+    var s = state.session;
+    if (!s) return;
+    /* 저장할 때마다 경과 시간을 누적해 두면, 탭을 닫았다 다시 열어도 타이머가 튀지 않는다. */
+    if (s.startedAt && !s.finishedAt) {
+      s.carryMs = elapsedMs();
+      s.startedAt = Date.now();
+    }
+    store(K_SESSION, s);
+  }
+  function history() { return store(K_HISTORY) || []; }
+  function pushHistory(result) {
+    var h = history();
+    h.unshift({
+      id: "r" + result.finishedAt,
+      setId: result.setId, setCode: result.setCode, setName: result.setName,
+      finishedAt: result.finishedAt, elapsedSec: result.elapsedSec,
+      completion: result.completion, coreAverage: result.coreAverage,
+      verdictLevel: result.verdict.level, verdictTitle: result.verdict.title,
+      full: result
+    });
+    store(K_HISTORY, h.slice(0, 30));
+  }
+
+  /* ---------------- 공통 UI ---------------- */
+
+  var root, toastEl;
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(function () { toastEl.classList.remove("show"); }, 2200);
+  }
+
+  function applyTheme(mode) {
+    if (mode === "light" || mode === "dark") document.documentElement.setAttribute("data-theme", mode);
+    else document.documentElement.removeAttribute("data-theme");
+    var btn = $("#themeBtn");
+    if (btn) btn.textContent = mode === "light" ? "라이트" : mode === "dark" ? "다크" : "시스템";
+  }
+  function cycleTheme() {
+    var cur = store(K_THEME) || "auto";
+    var next = cur === "auto" ? "light" : cur === "light" ? "dark" : "auto";
+    store(K_THEME, next);
+    applyTheme(next);
+  }
+
+  function appbar(extra) {
+    var bar = el("div", { class: "appbar" }, [
+      el("a", { class: "brand", href: "#", onclick: function (e) { e.preventDefault(); go("home"); } }, [
+        el("span", { class: "mark", text: "SKCT" }),
+        el("span", { text: "심층역량검사 시뮬레이터" }),
+        el("span", { class: "sub", text: "연습용" })
+      ])
+    ]);
+    if (extra) extra.forEach(function (n) { bar.appendChild(n); });
+    else bar.appendChild(el("div", { class: "appbar-spacer" }));
+    bar.appendChild(el("button", { class: "iconbtn", id: "themeBtn", type: "button", onclick: cycleTheme, title: "화면 테마 전환" }));
+    return bar;
+  }
+
+  function go(screen) {
+    state.screen = screen;
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------------- 홈 ---------------- */
+
+  function renderHome() {
+    var frag = document.createDocumentFragment();
+    frag.appendChild(appbar());
+
+    var saved = store(K_SESSION);
+    var hist = history();
+    var doneSets = {};
+    hist.forEach(function (h) { doneSets[h.setId] = doneSets[h.setId] || h; });
+
+    var wrap = el("div", { class: "wrap" });
+
+    var hero = el("div", { class: "hero" }, [
+      el("div", { class: "eyebrow", text: "SK그룹 종합역량검사 · 심층역량검사 대비" }),
+      el("h1", { text: "실전과 같은 형식으로 풀고, 신뢰도 지표까지 받아 보는 연습 검사" }),
+      el("p", {
+        class: "lede",
+        text: "한 문항군에 문장 세 개가 나오고, 각 문장에 ①~⑤로 답한 뒤 그중 나와 가장 가까운 문장과 가장 먼 문장을 고른다. 실제 심층역량검사와 같은 응답 방식이다. 제출하면 12개 역량 프로파일과 함께 과장응답·응답 일관성·응답 편향 세 가지 신뢰도 지표가 나온다."
+      }),
+      el("div", { class: "hero-facts" }, [
+        el("span", { html: "문항 은행 <b>204문장</b>" }),
+        el("span", { html: "역량 <b>12개</b>" }),
+        el("span", { html: "검사 세트 <b>5종</b>" }),
+        el("span", { html: "결과 데이터 <b>JSON · CSV 내보내기</b>" })
+      ])
+    ]);
+    wrap.appendChild(hero);
+
+    if (saved && saved.index > 0 && !saved.finishedAt) {
+      var sd = setDef(saved.setId);
+      var sh = sheetFor(saved.setId);
+      var resume = el("div", { class: "panel", style: "margin-bottom:32px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;" }, [
+        el("div", { style: "flex:1; min-width:240px;" }, [
+          el("div", { class: "eyebrow", text: "진행 중인 검사" }),
+          el("div", { style: "font-weight:600; margin-top:4px;", text: sd.code + " · " + sd.name }),
+          el("div", { style: "font-size:12.5px; color:var(--ink-2); margin-top:2px;", text: sh.groups.length + "문항군 중 " + saved.index + "번까지 응답했다." })
+        ]),
+        el("button", {
+          class: "btn btn-primary", type: "button", text: "이어서 응시",
+          onclick: function () { state.session = saved; go("test"); }
+        }),
+        el("button", {
+          class: "btn", type: "button", text: "버리기",
+          onclick: function () { store(K_SESSION, null); render(); }
+        })
+      ]);
+      wrap.appendChild(resume);
+    }
+
+    var grid = el("div", { class: "home-grid" });
+    var left = el("div", {});
+
+    left.appendChild(el("div", { class: "section-head" }, [
+      el("h2", { text: "검사 세트 선택" }),
+      el("span", { class: "hint", text: "세트를 고르면 바로 시작한다" })
+    ]));
+
+    var list = el("div", { class: "setlist" });
+    SETS.forEach(function (s) {
+      var sheet = sheetFor(s.id);
+      var stmts = sheet.groups.length * 3;
+      var pace = Math.round(s.minutes * 60 / sheet.groups.length);
+      var done = doneSets[s.id];
+
+      var meta = el("div", { class: "setrow-meta" }, [
+        el("span", { text: sheet.groups.length + "문항군 · " + stmts + "문장" }),
+        el("span", { text: s.minutes + "분" }),
+        el("span", { class: "pace", text: "문항군당 " + pace + "초" })
+      ]);
+
+      var body = el("div", {}, [
+        el("div", { class: "setrow-name", text: s.name }),
+        el("div", { class: "setrow-sum", text: s.summary }),
+        el("div", { class: "setrow-detail", text: s.detail })
+      ]);
+      if (done) {
+        body.appendChild(el("div", { class: "setrow-done" }, [
+          el("span", { text: "✓ 응시함 · 핵심역량 백분위 " + (done.coreAverage === null ? "—" : done.coreAverage) })
+        ]));
+      }
+
+      list.appendChild(el("button", {
+        class: "setrow", type: "button",
+        onclick: function () { startSet(s.id); }
+      }, [
+        el("div", { class: "setrow-code" }, [
+          el("span", { text: s.code }),
+          el("span", { class: "tag", text: s.tag })
+        ]),
+        body,
+        el("div", { style: "display:flex; align-items:flex-start; gap:16px;" }, [
+          meta,
+          el("span", { class: "setrow-go", text: "→" })
+        ])
+      ]));
+    });
+    left.appendChild(list);
+
+    left.appendChild(el("div", { class: "section-head", style: "margin-top:40px;" }, [
+      el("h2", { text: "응시 기록" }),
+      hist.length ? el("button", {
+        class: "linkbtn", type: "button", text: "기록 전체 삭제",
+        onclick: function () { store(K_HISTORY, null); render(); }
+      }) : el("span", { class: "hint", text: "이 브라우저에만 저장된다" })
+    ]));
+
+    if (!hist.length) {
+      left.appendChild(el("div", { class: "empty", text: "아직 응시 기록이 없다. 위에서 세트를 하나 골라 시작하면 결과가 여기에 쌓인다." }));
+    } else {
+      var tbody = el("tbody", {});
+      hist.forEach(function (h) {
+        var d = new Date(h.finishedAt);
+        tbody.appendChild(el("tr", {}, [
+          el("td", { text: h.setCode + " " + h.setName }),
+          el("td", { text: d.getFullYear() + "." + pad2(d.getMonth() + 1) + "." + pad2(d.getDate()) + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes()) }),
+          el("td", { class: "num", text: mmss(h.elapsedSec) }),
+          el("td", { class: "num", text: h.completion + "%" }),
+          el("td", { class: "num", text: h.coreAverage === null ? "—" : String(h.coreAverage) }),
+          el("td", {}, [el("span", { class: "chip " + h.verdictLevel, text: h.verdictLevel === "good" ? "양호" : h.verdictLevel === "warning" ? "주의" : "경고" })]),
+          el("td", {}, [el("button", {
+            class: "linkbtn", type: "button", text: "결과 보기",
+            onclick: function () { state.result = h.full; go("result"); }
+          })])
+        ]));
+      });
+      var table = el("table", { class: "histtable" }, [
+        el("thead", {}, [el("tr", {}, [
+          el("th", { text: "세트" }), el("th", { text: "응시 시각" }),
+          el("th", { class: "num", text: "소요" }), el("th", { class: "num", text: "완료율" }),
+          el("th", { class: "num", text: "핵심역량" }), el("th", { text: "신뢰도" }), el("th", { text: "" })
+        ])]),
+        tbody
+      ]);
+      left.appendChild(el("div", { class: "tablescroll" }, [table]));
+    }
+
+    var right = el("div", { class: "stack" }, [
+      el("div", { class: "panel" }, [
+        el("h3", { text: "응시 방법" }),
+        el("ol", { class: "steps" }, [
+          el("li", {}, [el("span", { html: "문장 세 개에 각각 <b>①~⑤</b>로 답한다. 키보드 <b>1~5</b>가 그대로 먹는다." })]),
+          el("li", {}, [el("span", { html: "세 문장 중 나와 <b>가장 가까운 것</b>과 <b>가장 먼 것</b>을 하나씩 고른다." })]),
+          el("li", {}, [el("span", { html: "제한 시간이 끝나면 <b>자동 제출</b>된다. 남은 문항은 미응답으로 채점된다." })]),
+          el("li", {}, [el("span", { html: "결과에서 역량 프로파일과 <b>신뢰도 3지표</b>를 확인하고 데이터를 내려받는다." })])
+        ])
+      ]),
+      el("div", { class: "panel" }, [
+        el("h3", { text: "무엇을 보면 되나" }),
+        el("p", { style: "font-size:13px; color:var(--ink-2);", text: "심층역량검사는 점수를 높이는 시험이 아니라 걸러지지 않는 것이 목표인 검사다. 그래서 역량 막대보다 신뢰도 3지표를 먼저 보는 편이 낫다." }),
+        el("div", { class: "notice", style: "margin-top:14px;", html: "좋아 보이는 쪽으로 답을 몰면 <b>과장응답</b> 지표가 오르고, 그걸 감추려고 답을 섞으면 <b>응답 일관성</b>이 떨어진다. 두 지표는 같이 올릴 수 없게 설계돼 있다. 결국 실제 자기 모습으로 일관되게 답하는 것이 가장 안전하다." })
+      ])
+    ]);
+
+    grid.appendChild(left);
+    grid.appendChild(right);
+    wrap.appendChild(grid);
+
+    wrap.appendChild(el("div", { class: "foot", text: "이 시뮬레이터의 문항과 규준은 실제 SKCT 기출이 아니라 공개된 검사 형식을 참고해 연습용으로 자체 제작한 것이다. 백분위는 평균 " + NORM_MEAN + ", 표준편차 " + NORM_SD + "의 시뮬레이션 규준으로 환산한 값이므로 실제 응시자 집단 대비 순위가 아니다. 응답 데이터는 서버로 전송되지 않고 이 브라우저에만 저장된다." }));
+
+    frag.appendChild(wrap);
+    return frag;
+  }
+
+  function startSet(setId) {
+    state.session = newSession(setId);
+    saveSession();
+    go("test");
+  }
+
+  /* ---------------- 응시 화면 ---------------- */
+
+  function remainingSec() {
+    var def = setDef(state.session.setId);
+    return def.minutes * 60 - elapsed();
+  }
+  function elapsedMs() {
+    return (Date.now() - state.session.startedAt) + (state.session.carryMs || 0);
+  }
+  function elapsed() { return Math.round(elapsedMs() / 1000); }
+
+  function renderTest() {
+    var s = state.session;
+    var def = setDef(s.setId);
+    var sheet = sheetFor(s.setId);
+    var total = sheet.groups.length;
+    var gi = clamp(s.index, 0, total - 1);
+    s.index = gi;
+    var group = sheet.groups[gi];
+    var pick = s.picks[gi] = s.picks[gi] || {};
+
+    var frag = document.createDocumentFragment();
+
+    var timer = el("span", { class: "timer", id: "timer", text: mmss(remainingSec()) });
+    frag.appendChild(appbar([
+      el("div", { class: "appbar-spacer" }),
+      el("span", { style: "font-family:var(--mono); font-size:12px; color:var(--ink-3);", text: def.code }),
+      timer,
+      el("button", {
+        class: "iconbtn", type: "button", text: "중단",
+        onclick: function () {
+          if (confirm("검사를 중단하고 홈으로 돌아간다. 진행 상황은 저장되어 나중에 이어서 응시할 수 있다.")) {
+            saveSession(); stopTimer(); go("home");
+          }
+        }
+      })
+    ]));
+
+    var prog = el("div", { class: "progressbar" }, [el("span", { style: "width:" + ((gi) / total * 100) + "%" })]);
+    frag.appendChild(prog);
+
+    var wrap = el("div", { class: "wrap narrow" });
+
+    wrap.appendChild(el("div", { class: "testhead" }, [
+      el("div", { class: "pos" }, [
+        el("b", { text: String(gi + 1) }),
+        el("span", { text: " / " + total + " 문항군" })
+      ]),
+      el("div", { style: "font-size:12.5px; color:var(--ink-3);", text: def.name })
+    ]));
+
+    var card = el("div", { class: "qcard" });
+    card.appendChild(el("div", { class: "scalelegend" }, [
+      el("span", { text: "각 문장이 나에게 얼마나 맞는지 고른다" }),
+      el("div", { class: "ends" }, [
+        el("span", { text: "전혀" }), el("span", { text: "아니다" }), el("span", { text: "보통" }),
+        el("span", { text: "그렇다" }), el("span", { text: "매우" })
+      ])
+    ]));
+
+    group.forEach(function (item, si) {
+      var scale = el("div", { class: "scale", role: "group", "aria-label": MARKS[si] + " 문장 응답" });
+      for (var v = 1; v <= 5; v++) {
+        (function (val) {
+          scale.appendChild(el("button", {
+            type: "button",
+            text: "①②③④⑤"[val - 1],
+            title: val + " — " + SCALE_LABELS[val - 1],
+            "aria-label": SCALE_LABELS[val - 1],
+            "aria-pressed": String(s.answers[item.id] === val),
+            onclick: function () { setAnswer(item.id, val); }
+          }));
+        })(v);
+      }
+      card.appendChild(el("div", { class: "stmt" }, [
+        el("div", { class: "stmt-text" }, [
+          el("span", { class: "stmt-tag", text: MARKS[si] }),
+          el("span", { text: item.text })
+        ]),
+        scale
+      ]));
+    });
+
+    function pickRow(kind) {
+      var row = el("div", { class: "pickrow " + kind });
+      group.forEach(function (item, si) {
+        row.appendChild(el("button", {
+          type: "button",
+          text: MARKS[si],
+          "aria-pressed": String(pick[kind] === item.id),
+          onclick: function () { setPick(gi, kind, item.id); }
+        }));
+      });
+      return row;
+    }
+
+    card.appendChild(el("div", { class: "forced" }, [
+      el("div", { class: "forced-group" }, [
+        el("div", { class: "label", html: "가장 <em>가깝다</em> (Most)" }),
+        pickRow("most")
+      ]),
+      el("div", { class: "forced-group" }, [
+        el("div", { class: "label", html: "가장 <em>멀다</em> (Least)" }),
+        pickRow("least")
+      ])
+    ]));
+    wrap.appendChild(card);
+
+    var complete = group.every(function (i) { return s.answers[i.id]; }) && pick.most && pick.least;
+    var isLast = gi === total - 1;
+
+    wrap.appendChild(el("div", { class: "navrow" }, [
+      el("button", {
+        class: "btn", type: "button", text: "← 이전", disabled: gi === 0 ? "" : null,
+        onclick: function () { if (gi > 0) { s.index = gi - 1; saveSession(); render(); } }
+      }),
+      el("span", {
+        class: "status" + (complete ? "" : " incomplete"),
+        text: complete ? "응답 완료" : "문장 3개 응답과 가깝다/멀다 선택이 모두 필요하다"
+      }),
+      el("div", { class: "spacer" }),
+      isLast
+        ? el("button", { class: "btn btn-primary", type: "button", text: "제출하고 결과 보기", onclick: function () { submit(false); } })
+        : el("button", { class: "btn btn-primary", type: "button", text: "다음 →", onclick: next })
+    ]));
+
+    wrap.appendChild(el("div", { class: "kbdhint", html:
+      "<kbd>1</kbd>~<kbd>5</kbd> 문장 응답(A→B→C 순서로 채워진다) · " +
+      "<kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 가장 가깝다 · <kbd>Z</kbd><kbd>X</kbd><kbd>C</kbd> 가장 멀다 · " +
+      "<kbd>Enter</kbd> 다음 문항군"
+    }));
+
+    frag.appendChild(wrap);
+    return frag;
+  }
+
+  function setAnswer(id, val) {
+    state.session.answers[id] = val;
+    saveSession();
+    render();
+  }
+  function setPick(gi, kind, id) {
+    var p = state.session.picks[gi] = state.session.picks[gi] || {};
+    var other = kind === "most" ? "least" : "most";
+    if (p[kind] === id) delete p[kind];
+    else {
+      p[kind] = id;
+      if (p[other] === id) delete p[other];
+    }
+    saveSession();
+    render();
+  }
+  function next() {
+    var sheet = sheetFor(state.session.setId);
+    if (state.session.index < sheet.groups.length - 1) {
+      state.session.index++;
+      saveSession();
+      render();
+      window.scrollTo(0, 0);
+    }
+  }
+
+  function submit(auto) {
+    var s = state.session;
+    s.elapsedSec = elapsed();
+    s.finishedAt = Date.now();
+    stopTimer();
+    var result = computeResult(s);
+    result.autoSubmitted = !!auto;
+    pushHistory(result);
+    store(K_SESSION, null);
+    state.result = result;
+    state.session = null;
+    go("result");
+    if (auto) toast("제한 시간이 끝나 자동 제출되었다.");
+  }
+
+  function startTimer() {
+    stopTimer();
+    state.timerId = setInterval(function () {
+      if (state.screen !== "test" || !state.session) return;
+      var left = remainingSec();
+      var t = $("#timer");
+      if (t) {
+        t.textContent = mmss(left);
+        t.className = "timer" + (left <= 60 ? " danger" : left <= 180 ? " warn" : "");
+      }
+      if (left <= 0) submit(true);
+    }, 1000);
+  }
+  function stopTimer() { if (state.timerId) { clearInterval(state.timerId); state.timerId = null; } }
+
+  document.addEventListener("keydown", function (e) {
+    if (state.screen !== "test" || !state.session) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea") return;
+
+    var s = state.session;
+    var sheet = sheetFor(s.setId);
+    var group = sheet.groups[s.index];
+    var key = e.key.toLowerCase();
+
+    if (key >= "1" && key <= "5") {
+      var target = group.filter(function (i) { return !s.answers[i.id]; })[0] || group[2];
+      e.preventDefault();
+      setAnswer(target.id, Number(key));
+      return;
+    }
+    var mostKeys = ["a", "s", "d"], leastKeys = ["z", "x", "c"];
+    if (mostKeys.indexOf(key) >= 0) { e.preventDefault(); setPick(s.index, "most", group[mostKeys.indexOf(key)].id); return; }
+    if (leastKeys.indexOf(key) >= 0) { e.preventDefault(); setPick(s.index, "least", group[leastKeys.indexOf(key)].id); return; }
+    if (e.key === "Enter" || e.key === "ArrowRight") {
+      e.preventDefault();
+      if (s.index === sheet.groups.length - 1) submit(false); else next();
+      return;
+    }
+    if (e.key === "ArrowLeft" && s.index > 0) {
+      e.preventDefault();
+      s.index--; saveSession(); render();
+    }
+  });
+
+  /* ---------------- 결과: 차트 ---------------- */
+
+  function barsChart(dims) {
+    var sorted = dims.slice().sort(function (a, b) { return b.percentile - a.percentile; });
+    var box = el("div", { class: "bars" });
+    sorted.forEach(function (d) {
+      var low = d.percentile < 35;
+      box.appendChild(el("div", {
+        class: "bar-row" + (low ? " is-low" : ""),
+        title: d.name + " — 백분위 " + d.percentile + " (" + d.band + ") · 원점수 " + d.raw.toFixed(2) + "/5 · 문항 " + d.n + "개"
+      }, [
+        el("div", { class: "bar-name", text: d.name }),
+        el("div", { class: "bar-track" }, [
+          el("div", { class: "bar-fill", style: "width:" + d.percentile + "%" }),
+          el("div", { class: "bar-mid" })
+        ]),
+        el("div", { class: "bar-tag", text: low ? "보완" : "" }),
+        el("div", { class: "bar-val num", text: String(d.percentile) })
+      ]));
+    });
+    box.appendChild(el("div", { class: "bar-axis" }, [
+      el("span", { text: "0" }), el("span", { text: "50 (규준 중앙)" }), el("span", { text: "100" })
+    ]));
+    return box;
+  }
+
+  function radarChart(dims) {
+    var W = 460, H = 420, cx = 230, cy = 208, R = 132;
+    var order = DIMS.map(function (d) {
+      return dims.filter(function (x) { return x.code === d.code; })[0];
+    }).filter(Boolean);
+    var n = order.length;
+    var ns = "http://www.w3.org/2000/svg";
+
+    function node(name, attrs, text) {
+      var e2 = document.createElementNS(ns, name);
+      Object.keys(attrs).forEach(function (k) { e2.setAttribute(k, attrs[k]); });
+      if (text !== undefined) e2.textContent = text;
+      return e2;
+    }
+    function pt(i, r) {
+      var a = -Math.PI / 2 + (i / n) * Math.PI * 2;
+      return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+    }
+
+    var svg = node("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": "12개 역량 백분위 프로파일 레이더 차트" });
+
+    [25, 50, 75, 100].forEach(function (lv) {
+      var pts = [];
+      for (var i = 0; i < n; i++) pts.push(pt(i, R * lv / 100).map(function (v) { return v.toFixed(1); }).join(","));
+      svg.appendChild(node("polygon", {
+        points: pts.join(" "), fill: "none",
+        stroke: "var(--line)", "stroke-width": lv === 100 ? 1 : 1,
+        "stroke-dasharray": lv === 100 ? "none" : "2 3"
+      }));
+    });
+    for (var i = 0; i < n; i++) {
+      var p = pt(i, R);
+      svg.appendChild(node("line", { x1: cx, y1: cy, x2: p[0].toFixed(1), y2: p[1].toFixed(1), stroke: "var(--line)", "stroke-width": 1 }));
+    }
+
+    var normPts = [], myPts = [];
+    for (var j = 0; j < n; j++) {
+      normPts.push(pt(j, R * 0.5).map(function (v) { return v.toFixed(1); }).join(","));
+      myPts.push(pt(j, R * order[j].percentile / 100).map(function (v) { return v.toFixed(1); }).join(","));
+    }
+    svg.appendChild(node("polygon", {
+      points: normPts.join(" "), fill: "none",
+      stroke: "var(--series-2)", "stroke-width": 2, "stroke-dasharray": "5 4"
+    }));
+    svg.appendChild(node("polygon", {
+      points: myPts.join(" "),
+      fill: "color-mix(in srgb, var(--accent) 16%, transparent)",
+      stroke: "var(--accent)", "stroke-width": 2, "stroke-linejoin": "round"
+    }));
+    for (var k = 0; k < n; k++) {
+      var mp = pt(k, R * order[k].percentile / 100);
+      svg.appendChild(node("circle", { cx: mp[0].toFixed(1), cy: mp[1].toFixed(1), r: 3.5, fill: "var(--accent)", stroke: "var(--surface)", "stroke-width": 2 }));
+    }
+    for (var m = 0; m < n; m++) {
+      var lp = pt(m, R + 20);
+      var ang = -Math.PI / 2 + (m / n) * Math.PI * 2;
+      var cos = Math.cos(ang);
+      var anchor = Math.abs(cos) < 0.25 ? "middle" : (cos > 0 ? "start" : "end");
+      var label = node("text", {
+        x: lp[0].toFixed(1), y: lp[1].toFixed(1),
+        "text-anchor": anchor, "dominant-baseline": "middle",
+        fill: "var(--ink-2)", "font-size": "11.5", "font-family": "var(--sans)"
+      }, order[m].short);
+      svg.appendChild(label);
+      var vlab = node("text", {
+        x: lp[0].toFixed(1), y: (lp[1] + 13).toFixed(1),
+        "text-anchor": anchor, "dominant-baseline": "middle",
+        fill: "var(--ink-3)", "font-size": "10", "font-family": "var(--mono)"
+      }, String(order[m].percentile));
+      svg.appendChild(vlab);
+    }
+
+    return el("div", { class: "radar-wrap" }, [
+      svg,
+      el("div", { class: "legend" }, [
+        el("span", { html: '<i style="background:var(--accent)"></i>내 백분위' }),
+        el("span", { html: '<i style="background:var(--series-2)"></i>규준 중앙(50)' })
+      ])
+    ]);
+  }
+
+  function meterBlock(name, value, level, unit, note) {
+    var color = level === "good" ? "var(--good)" : level === "warning" ? "var(--warning)" : "var(--critical)";
+    var chipText = level === "good" ? "양호" : level === "warning" ? "주의" : "경고";
+    var ico = level === "good" ? "✓" : level === "warning" ? "▲" : "●";
+    return el("div", {}, [
+      el("div", { class: "meter-head" }, [
+        el("span", { class: "meter-name", text: name }),
+        el("span", { style: "display:flex; align-items:center; gap:9px;" }, [
+          el("span", { class: "chip " + level }, [el("span", { text: ico }), el("span", { text: chipText })]),
+          el("span", { class: "meter-val", text: value === null ? "—" : value + unit })
+        ])
+      ]),
+      el("div", { class: "meter-track" }, [
+        el("div", { class: "meter-fill", style: "width:" + (value === null ? 0 : value) + "%; background:" + color + ";" })
+      ]),
+      el("div", { class: "meter-note", text: note })
+    ]);
+  }
+
+  function distChart(counts) {
+    var total = counts.reduce(function (a, b) { return a + b; }, 0) || 1;
+    var max = Math.max.apply(null, counts) || 1;
+    var box = el("div", { class: "dist" });
+    counts.forEach(function (c, i) {
+      var pct = Math.round(c / total * 100);
+      box.appendChild(el("div", { class: "dist-col", title: SCALE_LABELS[i] + " — " + c + "회 (" + pct + "%)" }, [
+        el("div", { class: "dist-pct num", text: pct + "%" }),
+        el("div", { class: "dist-bar", style: "height:" + Math.max(2, Math.round(c / max * 54)) + "px" }),
+        el("div", { class: "dist-lab", text: "①②③④⑤"[i] })
+      ]));
+    });
+    return box;
+  }
+
+  /* ---------------- 결과 화면 ---------------- */
+
+  function renderResult() {
+    var r = state.result;
+    var frag = document.createDocumentFragment();
+
+    frag.appendChild(appbar([
+      el("div", { class: "appbar-spacer" }),
+      el("button", { class: "iconbtn", type: "button", text: "← 세트 목록", onclick: function () { go("home"); } })
+    ]));
+
+    var wrap = el("div", { class: "wrap" });
+    var d = new Date(r.finishedAt);
+
+    wrap.appendChild(el("div", { class: "hero", style: "margin-bottom:22px; gap:8px;" }, [
+      el("div", { class: "eyebrow", text: "검사 결과 · " + r.setCode + " " + r.setName }),
+      el("h1", { style: "font-size:clamp(22px,3vw,28px);", text: "심층역량 프로파일 리포트" })
+    ]));
+
+    var rel = r.reliability;
+    wrap.appendChild(el("div", { class: "verdict is-" + r.verdict.level }, [
+      el("div", { class: "stripe" }),
+      el("div", { class: "verdict-body" }, [
+        el("div", { class: "verdict-title" }, [
+          el("span", { class: "ico", text: r.verdict.ico }),
+          el("span", { text: r.verdict.title })
+        ]),
+        el("p", { text: r.verdict.text }),
+        el("div", { class: "verdict-meta" }, [
+          el("span", { text: "응시 " + d.getFullYear() + "." + pad2(d.getMonth() + 1) + "." + pad2(d.getDate()) + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes()) }),
+          el("span", { text: "소요 " + mmss(r.elapsedSec) + " / 제한 " + mmss(r.limitSec) }),
+          el("span", { text: "응답 " + r.answeredStatements + "/" + r.totalStatements + "문장 (" + r.completion + "%)" }),
+          el("span", { text: "가깝다·멀다 선택 " + r.pickCompletion + "%" }),
+          el("span", { text: "핵심역량 평균 백분위 " + (r.coreAverage === null ? "—" : r.coreAverage) }),
+          r.autoSubmitted ? el("span", { text: "시간 초과 자동 제출" }) : null
+        ])
+      ])
+    ]));
+
+    var grid = el("div", { class: "resgrid" });
+    var main = el("div", { class: "stack" });
+    var side = el("div", { class: "stack" });
+
+    /* 역량 막대 */
+    main.appendChild(el("div", { class: "card" }, [
+      el("div", { class: "card-head" }, [
+        el("h2", { text: "역량별 백분위" }),
+        el("span", { class: "note", text: "높은 순 정렬 · 시뮬레이션 규준" })
+      ]),
+      el("div", { class: "card-body" }, [barsChart(r.dimensions)])
+    ]));
+
+    /* 강점 / 보완 */
+    var picks = el("div", { class: "picks" });
+    r.strengths.forEach(function (dm) {
+      picks.appendChild(el("div", { class: "pick" }, [
+        el("div", { class: "rail" }),
+        el("div", {}, [
+          el("div", { class: "pick-name" }, [
+            el("span", { text: dm.name }),
+            el("span", { class: "pct num", text: "백분위 " + dm.percentile + " · " + dm.band })
+          ]),
+          el("div", { class: "pick-desc", text: dm.desc }),
+          el("div", { class: "pick-tip", html: "<b>활용</b> " + COACH[dm.code].good })
+        ])
+      ]));
+    });
+    main.appendChild(el("div", { class: "card" }, [
+      el("div", { class: "card-head" }, [
+        el("h2", { text: "강점 상위 3개" }),
+        el("span", { class: "note", text: "면접 답변의 축으로 쓸 영역" })
+      ]),
+      el("div", { class: "card-body" }, [picks])
+    ]));
+
+    var gaps = el("div", { class: "picks" });
+    r.gaps.forEach(function (dm) {
+      gaps.appendChild(el("div", { class: "pick is-gap" }, [
+        el("div", { class: "rail" }),
+        el("div", {}, [
+          el("div", { class: "pick-name" }, [
+            el("span", { text: dm.name }),
+            el("span", { class: "pct num", text: "백분위 " + dm.percentile + " · " + dm.band })
+          ]),
+          el("div", { class: "pick-desc", text: dm.desc }),
+          el("div", { class: "pick-tip", html: "<b>보완</b> " + COACH[dm.code].gap })
+        ])
+      ]));
+    });
+    main.appendChild(el("div", { class: "card" }, [
+      el("div", { class: "card-head" }, [
+        el("h2", { text: "보완이 필요한 3개" }),
+        el("span", { class: "note", text: "낮은 순" })
+      ]),
+      el("div", { class: "card-body" }, [gaps])
+    ]));
+
+    /* 예상 질문 */
+    var qs = el("ul", { class: "qlist" });
+    r.gaps.concat(r.strengths.slice(0, 2)).forEach(function (dm) {
+      var isGap = r.gaps.indexOf(dm) >= 0;
+      qs.appendChild(el("li", {}, [
+        el("div", { class: "q", text: COACH[dm.code].q }),
+        el("div", { class: "why", html: "<b>" + dm.code + "</b> " + dm.name + " · 백분위 " + dm.percentile + " — " + (isGap ? "낮게 나온 영역이라 근거를 요구받기 쉽다" : "강점으로 잡힌 영역이라 구체적 사례가 필요하다") })
+      ]));
+    });
+    main.appendChild(el("div", { class: "card" }, [
+      el("div", { class: "card-head" }, [
+        el("h2", { text: "이 프로파일에서 나오기 쉬운 면접 질문" }),
+        el("span", { class: "note", text: "5문항" })
+      ]),
+      el("div", { class: "card-body" }, [qs])
+    ]));
+
+    /* 문항별 리뷰 */
+    main.appendChild(reviewCard(r));
+
+    /* --- 사이드 --- */
+    var sdNote = rel.socialDesirability.value === null
+      ? "이 세트에는 과장응답 문항이 없다."
+      : rel.socialDesirability.level === "good"
+        ? "과장 없이 답했다. 실제 검사에서도 이 수준을 유지하면 된다."
+        : rel.socialDesirability.level === "warning"
+          ? "좋아 보이는 쪽으로 살짝 기울었다. '한 번도 없다' 류의 문장에 ④~⑤로 답한 곳을 다시 보자."
+          : "누구에게나 있는 일까지 부정했다. 실제 검사에서는 왜곡 응답으로 분류될 수 있는 구간이다.";
+    var consNote = rel.consistency.value === null
+      ? "일관성 산출에 필요한 유사 문항 쌍이 없다."
+      : rel.consistency.level === "good"
+        ? "표현만 바꾼 같은 내용의 문항에 비슷하게 답했다."
+        : rel.consistency.level === "warning"
+          ? "일부 유사 문항에서 응답이 엇갈렸다. 속도를 조금 늦추면 대부분 해결된다."
+          : "같은 내용의 문항에 반대로 답한 경우가 많다. 꾸며서 답하거나 급하게 찍었을 때 나오는 패턴이다.";
+    var balNote = rel.responseBalance.level === "good"
+      ? "①~⑤를 고르게 썼다."
+      : rel.responseBalance.extremePct > 50
+        ? "①과 ⑤에 " + rel.responseBalance.extremePct + "%가 몰렸다. 극단으로만 답하면 프로파일이 과장되게 잡힌다."
+        : "③(보통)에 " + rel.responseBalance.middlePct + "%가 몰렸다. 중간으로만 답하면 변별이 안 되어 '판단 보류'로 처리되기 쉽다.";
+
+    side.appendChild(el("div", { class: "card" }, [
+      el("div", { class: "card-head" }, [
+        el("h2", { text: "신뢰도 3지표" }),
+        el("span", { class: "note", text: "먼저 볼 것" })
+      ]),
+      el("div", { class: "card-body" }, [
+        el("div", { class: "meters" }, [
+          meterBlock("과장응답 위험", rel.socialDesirability.value, rel.socialDesirability.level, "", sdNote + (rel.socialDesirability.n ? " (문항 " + rel.socialDesirability.n + "개)" : "")),
+          meterBlock("응답 일관성", rel.consistency.value, rel.consistency.level, "", consNote + (rel.consistency.n ? " (유사 문항 " + rel.consistency.n + "쌍)" : "")),
+          meterBlock("응답 균형", rel.responseBalance.value, rel.responseBalance.level, "", balNote)
+        ])
+      ])
+    ]));
+
+    side.appendChild(el("div", { class: "card" }, [
+      el("div", { class: "card-head" }, [
+        el("h2", { text: "프로파일 형태" }),
+        el("span", { class: "note", text: "12축" })
+      ]),
+      el("div", { class: "card-body" }, [radarChart(r.dimensions)])
+    ]));
+
+    side.appendChild(el("div", { class: "card" }, [
+      el("div", { class: "card-head" }, [
+        el("h2", { text: "응답 분포" }),
+        el("span", { class: "note", text: "선택지별 비율" })
+      ]),
+      el("div", { class: "card-body" }, [
+        distChart(r.distribution),
+        el("p", { style: "margin-top:12px; font-size:12px; color:var(--ink-2);", text: "극단(①⑤) " + rel.responseBalance.extremePct + "% · 중앙(③) " + rel.responseBalance.middlePct + "%. 실전에서는 극단 45% 이하, 중앙 35% 이하가 무난하다." })
+      ])
+    ]));
+
+    grid.appendChild(main);
+    grid.appendChild(side);
+    wrap.appendChild(grid);
+
+    wrap.appendChild(el("div", { class: "actions" }, [
+      el("button", { class: "btn btn-primary", type: "button", text: "같은 세트 다시 응시", onclick: function () { startSet(r.setId); } }),
+      el("button", { class: "btn", type: "button", text: "다른 세트 고르기", onclick: function () { go("home"); } }),
+      el("button", { class: "btn", type: "button", text: "결과 JSON 내려받기", onclick: function () { download(r.setId + "-" + r.finishedAt + ".json", JSON.stringify(r, null, 2), "application/json"); } }),
+      el("button", { class: "btn", type: "button", text: "응답 CSV 내려받기", onclick: function () { download(r.setId + "-" + r.finishedAt + ".csv", buildCSV(r), "text/csv"); } }),
+      el("button", { class: "btn", type: "button", text: "JSON 클립보드 복사", onclick: function () { copyText(JSON.stringify(r, null, 2)); } })
+    ]));
+
+    wrap.appendChild(el("div", { class: "foot", text: "백분위는 원점수를 평균 " + r.norm.mean + " / 표준편차 " + r.norm.sd + "의 정규분포로 환산한 값이다. " + r.norm.note + ". 내려받기가 막힌 환경(임베드된 미리보기 등)에서는 'JSON 클립보드 복사'를 쓰면 된다." }));
+
+    frag.appendChild(wrap);
+    return frag;
+  }
+
+  function reviewCard(r) {
+    var rows = r.responses || [];
+    var tbody = el("tbody", {});
+    rows.forEach(function (row) {
+      tbody.appendChild(el("tr", {}, [
+        el("td", { class: "num", text: row.group + row.mark }),
+        el("td", { class: "stmt-col", text: row.text }),
+        el("td", { class: "rev", text: DIM_BY_CODE[row.dim] ? DIM_BY_CODE[row.dim].short : "과장" }),
+        el("td", { class: "rev", text: row.reverse ? "역채점" : "정" }),
+        el("td", { class: "num", text: row.rating || "—" }),
+        el("td", { class: "num", text: row.rating ? row.scored : "—" }),
+        el("td", { class: "num", text: row.most ? "가깝다" : row.least ? "멀다" : "" })
+      ]));
+    });
+    var table = el("table", { class: "reviewtable" }, [
+      el("thead", {}, [el("tr", {}, [
+        el("th", { text: "문항" }), el("th", { text: "문장" }), el("th", { text: "역량" }),
+        el("th", { text: "채점" }), el("th", { text: "응답" }), el("th", { text: "환산" }), el("th", { text: "선택" })
+      ])]),
+      tbody
+    ]);
+    var det = el("details", { class: "review" }, [
+      el("summary", {}, [
+        el("span", { text: "문항별 응답 다시 보기 (" + rows.length + "문장)" }),
+        el("span", { class: "caret", text: "펼치기 ▾" })
+      ]),
+      el("div", { style: "padding:0 20px 20px;" }, [el("div", { class: "tablescroll" }, [table])])
+    ]);
+    return el("div", { class: "card" }, [
+      el("div", { class: "card-head" }, [
+        el("h2", { text: "응답 원자료" }),
+        el("span", { class: "note", text: "역채점 문항 포함" })
+      ]),
+      el("div", { style: "padding:0 0 0;" }, [det])
+    ]);
+  }
+
+  /* 채점 시점에 원자료 표를 함께 만들어 결과 객체에 싣는다. */
+  var _compute = computeResult;
+  computeResult = function (session) {
+    var r = _compute(session);
+    var sheet = sheetFor(session.setId);
+    var rows = [];
+    sheet.groups.forEach(function (g, gi) {
+      var pick = session.picks[gi] || {};
+      g.forEach(function (item, si) {
+        var rating = session.answers[item.id] || null;
+        rows.push({
+          group: gi + 1, mark: MARKS[si], id: item.id, dim: item.dim,
+          text: item.text, reverse: item.key < 0,
+          rating: rating, scored: rating ? scored(item, rating) : null,
+          most: pick.most === item.id, least: pick.least === item.id
+        });
+      });
+    });
+    r.responses = rows;
+    return r;
+  };
+
+  /* ---------------- 내보내기 ---------------- */
+
+  function buildCSV(r) {
+    var head = ["문항군", "문장기호", "문항ID", "역량코드", "역량명", "문항", "채점방향", "응답", "환산점수", "가장가깝다", "가장멀다"];
+    var lines = [head.join(",")];
+    r.responses.forEach(function (row) {
+      var dim = DIM_BY_CODE[row.dim];
+      lines.push([
+        row.group, row.mark, row.id, row.dim,
+        dim ? dim.name : "과장응답",
+        '"' + row.text.replace(/"/g, '""') + '"',
+        row.reverse ? "역채점" : "정채점",
+        row.rating || "", row.scored === null ? "" : row.scored,
+        row.most ? 1 : 0, row.least ? 1 : 0
+      ].join(","));
+    });
+    lines.push("");
+    lines.push("역량코드,역량명,문항수,원점수(1-5),환산점수(0-100),백분위,구간");
+    r.dimensions.forEach(function (d) {
+      lines.push([d.code, d.name, d.n, d.raw, d.score, d.percentile, d.band].join(","));
+    });
+    lines.push("");
+    lines.push("지표,값,판정");
+    lines.push(["과장응답위험", r.reliability.socialDesirability.value, r.reliability.socialDesirability.level].join(","));
+    lines.push(["응답일관성", r.reliability.consistency.value, r.reliability.consistency.level].join(","));
+    lines.push(["응답균형", r.reliability.responseBalance.value, r.reliability.responseBalance.level].join(","));
+    return "﻿" + lines.join("\n");
+  }
+
+  function download(name, text, mime) {
+    try {
+      var blob = new Blob([text], { type: mime + ";charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var a = el("a", { href: url, download: name });
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 400);
+      toast(name + " 내려받기를 시작했다.");
+    } catch (e) {
+      copyText(text);
+    }
+  }
+
+  function copyText(text) {
+    function fallback() {
+      var ta = el("textarea", { style: "position:fixed;opacity:0;top:0;left:0;" });
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); toast("클립보드에 복사했다."); }
+      catch (e2) { toast("복사에 실패했다. 결과 화면을 직접 선택해 복사해야 한다."); }
+      ta.remove();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { toast("클립보드에 복사했다."); }, fallback);
+    } else fallback();
+  }
+
+  /* ---------------- 렌더 루프 ---------------- */
+
+  function render() {
+    var frag;
+    if (state.screen === "test" && state.session) frag = renderTest();
+    else if (state.screen === "result" && state.result) frag = renderResult();
+    else { state.screen = "home"; frag = renderHome(); }
+
+    root.innerHTML = "";
+    root.appendChild(frag);
+    applyTheme(store(K_THEME) || "auto");
+
+    if (state.screen === "test") startTimer(); else stopTimer();
+  }
+
+  function init() {
+    root = el("div", { id: "app" });
+    toastEl = el("div", { class: "toast", role: "status", "aria-live": "polite" });
+    document.body.appendChild(root);
+    document.body.appendChild(toastEl);
+    applyTheme(store(K_THEME) || "auto");
+    render();
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+
+</script>
