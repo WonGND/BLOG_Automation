@@ -13,6 +13,8 @@ const read = (p) => readFileSync(resolve(here, p), "utf8");
 const css = read("assets/style.css");
 const bank = read("assets/bank.js");
 const app = read("assets/app.js");
+const cogBank = read("assets/cognitive-bank.js");
+const cog = read("assets/cognitive.js");
 const html = read("index.html");
 
 const head = html.match(/<head>([\s\S]*?)<\/head>/)[1];
@@ -26,7 +28,9 @@ const inlined = [
   `<style>\n${css}\n</style>`,
   noscript,
   `<script>\n${bank}\n</script>`,
-  `<script>\n${app}\n</script>`
+  `<script>\n${app}\n</script>`,
+  `<script>\n${cogBank}\n</script>`,
+  `<script>\n${cog}\n</script>`
 ].join("\n");
 
 mkdirSync(resolve(here, "dist"), { recursive: true });

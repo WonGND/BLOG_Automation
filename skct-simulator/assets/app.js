@@ -160,6 +160,7 @@
   var K_SESSION = "skct.v1.session";
   var K_HISTORY = "skct.v1.history";
   var K_THEME = "skct.v1.theme";
+  var K_HOMETAB = "skct.v1.hometab";
 
   /* ---------------- 검사지 조립 ---------------- */
 
@@ -461,7 +462,7 @@
     var bar = el("div", { class: "appbar" }, [
       el("a", { class: "brand", href: "#", onclick: function (e) { e.preventDefault(); go("home"); } }, [
         el("span", { class: "mark", text: "SKCT" }),
-        el("span", { class: "name", text: "심층역량 리허설" }),
+        el("span", { class: "name", text: "SKCT 리허설" }),
         el("span", { class: "sub", text: "연습용" })
       ])
     ]);
@@ -483,12 +484,15 @@
   /* 뒤로가기: 응시 중이면 진행 상황을 저장하고 홈으로 — 페이지를 벗어나지 않는다. */
   window.addEventListener("popstate", function () {
     if (state.screen === "test") { saveSession(); stopTimer(); }
+    if (window.SKCT_COG) window.SKCT_COG.onLeave(state.screen);
     go("home", true);
   });
 
   /* 응시 중 새로고침·탭 닫기 경고. 진행 상황은 저장돼 있지만 실수로 나가는 것을 한 번 막는다. */
   window.addEventListener("beforeunload", function (e) {
-    if (state.screen === "test" && state.session && !state.submitting) {
+    var busy = (state.screen === "test" && state.session && !state.submitting) ||
+      (window.SKCT_COG && window.SKCT_COG.isBusy());
+    if (busy) {
       e.preventDefault();
       e.returnValue = "";
       return "";
@@ -497,7 +501,35 @@
 
   /* ---------------- 홈 ---------------- */
 
+  function homeTabs() {
+    var cur = store(K_HOMETAB) || "deep";
+    function tab(id, label, sub) {
+      return el("button", {
+        class: "hometab" + (cur === id ? " is-on" : ""),
+        type: "button", "aria-pressed": String(cur === id),
+        onclick: function () { store(K_HOMETAB, id); render(); window.scrollTo(0, 0); }
+      }, [
+        el("span", { class: "t", text: label }),
+        el("span", { class: "s", text: sub })
+      ]);
+    }
+    return el("div", { class: "hometabs", role: "group", "aria-label": "검사 종류 선택" }, [
+      tab("deep", "심층역량검사", "성격·역량 · 신뢰도 지표"),
+      tab("cog", "인지역량검사", "언어·수리·추리 · 정답 채점")
+    ]);
+  }
+
   function renderHome() {
+    if ((store(K_HOMETAB) || "deep") === "cog" && window.SKCT_COG) {
+      var f = document.createDocumentFragment();
+      f.appendChild(appbar());
+      var w = el("div", { class: "wrap" });
+      w.appendChild(homeTabs());
+      window.SKCT_COG.homeBody(w);
+      f.appendChild(w);
+      return f;
+    }
+
     var frag = document.createDocumentFragment();
     frag.appendChild(appbar());
 
@@ -507,6 +539,7 @@
     hist.forEach(function (h) { doneSets[h.setId] = doneSets[h.setId] || h; });
 
     var wrap = el("div", { class: "wrap" });
+    wrap.appendChild(homeTabs());
 
     var hero = el("div", { class: "hero" }, [
       el("div", { class: "eyebrow", text: "SK그룹 종합역량검사 · 심층역량검사 대비" }),
@@ -1420,8 +1453,10 @@
 
   function render() {
     var frag;
+    var isCog = state.screen.indexOf("cog-") === 0;
     if (state.screen === "test" && state.session) frag = renderTest();
     else if (state.screen === "result" && state.result) { state.ui = null; frag = renderResult(); }
+    else if (isCog && window.SKCT_COG) { state.ui = null; frag = window.SKCT_COG.render(state.screen); }
     else { state.screen = "home"; state.ui = null; frag = renderHome(); }
 
     root.innerHTML = "";
@@ -1429,6 +1464,7 @@
     applyTheme(store(K_THEME) || "auto");
 
     if (state.screen === "test") startTimer(); else stopTimer();
+    if (window.SKCT_COG) window.SKCT_COG.afterRender(state.screen);
   }
 
   function init() {
@@ -1444,6 +1480,16 @@
       }, 900);
     }
   }
+
+  /* 인지역량 모듈이 같은 셸·유틸리티를 쓰도록 노출한다. */
+  window.SKCT = {
+    el: el, $: $, clamp: clamp, pad2: pad2, mmss: mmss,
+    store: store, storageOK: function () { return storageOK; },
+    toast: toast, appbar: appbar, go: go, render: render,
+    download: download, copyText: copyText, buildCSVLine: null,
+    percentileOf: percentileOf, erf: erf,
+    state: state
+  };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
