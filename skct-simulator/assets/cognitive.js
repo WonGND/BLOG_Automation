@@ -62,11 +62,7 @@
 
   function buildParts(def) {
     return def.parts.map(function (p) {
-      var items = [];
-      p.pick.forEach(function (spec) {
-        for (var i = spec[1]; i < spec[2]; i++) items.push(BANK[spec[0]][i].id);
-      });
-      return { title: p.title, sec: p.sec, minutes: p.minutes, items: items };
+      return { title: p.title, sec: p.sec, minutes: p.minutes, items: p.items.slice() };
     });
   }
 

@@ -13,6 +13,7 @@ const read = (p) => readFileSync(resolve(here, p), "utf8");
 const css = read("assets/style.css");
 const bank = read("assets/bank.js");
 const app = read("assets/app.js");
+const cogExams = [1, 2, 3, 4, 5].map((n) => read(`assets/cog-exams/exam${n}.js`));
 const cogBank = read("assets/cognitive-bank.js");
 const cog = read("assets/cognitive.js");
 const html = read("index.html");
@@ -29,6 +30,7 @@ const inlined = [
   noscript,
   `<script>\n${bank}\n</script>`,
   `<script>\n${app}\n</script>`,
+  ...cogExams.map((src) => `<script>\n${src}\n</script>`),
   `<script>\n${cogBank}\n</script>`,
   `<script>\n${cog}\n</script>`
 ].join("\n");
