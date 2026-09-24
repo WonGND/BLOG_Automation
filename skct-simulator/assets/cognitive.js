@@ -158,7 +158,44 @@
   /* ---------------- 개념 및 치트키 정리 ---------------- */
 
   var GUIDE = window.SKCT_COG_GUIDE || [];
-  var guideUI = { area: "all", open: {} };
+  var guideUI = { area: "all", open: {}, list: null, toggle: null };
+
+  /* 펼쳐진 카드 수를 세어 전체 토글 버튼의 라벨·화살표·개수를 실제 상태와 맞춘다.
+     카드를 하나씩 여닫아도 버튼이 따라 움직인다. */
+  function syncGuideToggle() {
+    /* 아직 문서에 붙기 전(첫 조립 중)에도 세야 하므로 연결 여부는 보지 않는다. */
+    var list = guideUI.list, btn = guideUI.toggle;
+    if (!list || !btn) return;
+    var cards = list.querySelectorAll("details.gcard");
+    var open = 0;
+    for (var i = 0; i < cards.length; i++) if (cards[i].open) open++;
+    var allOpen = cards.length > 0 && open === cards.length;
+    btn.classList.toggle("is-open", allOpen);
+    btn.setAttribute("aria-pressed", String(allOpen));
+    btn.querySelector(".gtoggle-t").textContent = allOpen ? "모두 접기" : "모두 펼치기";
+    btn.querySelector(".gtoggle-n").textContent = open + "/" + cards.length;
+
+    var areas = list.querySelectorAll(".garea");
+    for (var a = 0; a < areas.length; a++) {
+      var ab = areas[a].querySelector(".garea-toggle");
+      if (!ab) continue;
+      var ac = areas[a].querySelectorAll("details.gcard"), o = 0;
+      for (var k = 0; k < ac.length; k++) if (ac[k].open) o++;
+      var full = ac.length > 0 && o === ac.length;
+      ab.textContent = full ? "이 영역 접기" : "이 영역 펼치기";
+      ab.setAttribute("aria-pressed", String(full));
+    }
+  }
+
+  /* 여러 카드를 한꺼번에 여닫는다. 접을 때 화면이 본문 아래로 붕 뜨지 않도록 되돌린다. */
+  function setCardsOpen(cards, open) {
+    for (var i = 0; i < cards.length; i++) cards[i].open = open;
+    syncGuideToggle();
+    if (!open && guideUI.list) {
+      var r = guideUI.list.getBoundingClientRect();
+      if (r.top < 0) window.scrollTo(0, window.scrollY + r.top - 120);
+    }
+  }
 
   /* 지금까지의 응시 기록에서 유형군별 정답률을 모은다. 카드에 내 성적을 붙여 두면
      어느 개념부터 볼지 고르는 데 쓸 수 있다. */
@@ -250,7 +287,7 @@
   function guideCard(t, stats) {
     var card = el("details", { class: "gcard" });
     if (guideUI.open[t.id]) card.setAttribute("open", "");
-    card.addEventListener("toggle", function () { guideUI.open[t.id] = card.open; });
+    card.addEventListener("toggle", function () { guideUI.open[t.id] = card.open; syncGuideToggle(); });
 
     var st = stats[t.group];
     var rateNode = null;
@@ -317,12 +354,27 @@
       var block = el("div", { class: "garea" });
       block.appendChild(el("div", { class: "garea-head" }, [
         el("h3", { text: sec.name }),
-        el("span", { class: "garea-meta", text: topics.length + "개 유형 · 예상문제 " +
-          topics.reduce(function (a, t) { return a + t.drills.length; }, 0) + "문항" })
+        el("span", { class: "garea-right" }, [
+          el("span", { class: "garea-meta", text: topics.length + "개 유형 · 예상문제 " +
+            topics.reduce(function (a, t) { return a + t.drills.length; }, 0) + "문항" }),
+          areaToggle(block)
+        ])
       ]));
       topics.forEach(function (t) { block.appendChild(guideCard(t, stats)); });
       list.appendChild(block);
     });
+    syncGuideToggle();
+  }
+
+  function areaToggle(block) {
+    var b = el("button", { class: "garea-toggle", type: "button", "aria-pressed": "false", text: "이 영역 펼치기" });
+    b.addEventListener("click", function () {
+      var cards = block.querySelectorAll("details.gcard");
+      var open = 0;
+      for (var i = 0; i < cards.length; i++) if (cards[i].open) open++;
+      setCardsOpen(cards, open < cards.length);
+    });
+    return b;
   }
 
   function guideSection() {
@@ -366,17 +418,25 @@
       chips.appendChild(b);
     });
 
-    var openAll = el("button", { class: "linkbtn", type: "button", text: "모두 펼치기" });
-    openAll.addEventListener("click", function () {
-      var shown = list.querySelectorAll("details.gcard");
-      var anyClosed = false;
-      for (var i = 0; i < shown.length; i++) if (!shown[i].open) anyClosed = true;
-      for (var j = 0; j < shown.length; j++) shown[j].open = anyClosed;
-      GUIDE.forEach(function (t) { guideUI.open[t.id] = anyClosed; });
-      openAll.textContent = anyClosed ? "모두 접기" : "모두 펼치기";
+    var toggleAll = el("button", {
+      class: "gtoggle", type: "button", "aria-pressed": "false",
+      title: "펼쳐진 유형 카드를 한 번에 모두 접거나 펼친다"
+    }, [
+      el("span", { class: "gtoggle-ico", "aria-hidden": "true" }),
+      el("span", { class: "gtoggle-t", text: "모두 펼치기" }),
+      el("span", { class: "gtoggle-n num", text: "0/0" })
+    ]);
+    toggleAll.addEventListener("click", function () {
+      var cards = list.querySelectorAll("details.gcard");
+      var open = 0;
+      for (var i = 0; i < cards.length; i++) if (cards[i].open) open++;
+      setCardsOpen(cards, open < cards.length);
     });
 
-    box.appendChild(el("div", { class: "guide-bar" }, [chips, openAll]));
+    guideUI.list = list;
+    guideUI.toggle = toggleAll;
+
+    box.appendChild(el("div", { class: "guide-bar" }, [chips, toggleAll]));
     paintGuideList(list);
     box.appendChild(list);
     box.appendChild(el("p", { class: "guide-foot",
