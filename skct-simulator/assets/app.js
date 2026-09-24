@@ -502,7 +502,7 @@
   /* ---------------- 홈 ---------------- */
 
   function homeTabs() {
-    var cur = store(K_HOMETAB) || "deep";
+    var cur = store(K_HOMETAB) || "cog";
     function tab(id, label, sub) {
       return el("button", {
         class: "hometab" + (cur === id ? " is-on" : ""),
@@ -515,12 +515,12 @@
     }
     return el("div", { class: "hometabs", role: "group", "aria-label": "검사 종류 선택" }, [
       tab("deep", "심층역량검사", "성격·역량 · 신뢰도 지표"),
-      tab("cog", "인지역량검사", "언어·수리·추리 · 정답 채점")
+      tab("cog", "인지역량검사", "5영역 · 개념 정리와 채점")
     ]);
   }
 
   function renderHome() {
-    if ((store(K_HOMETAB) || "deep") === "cog" && window.SKCT_COG) {
+    if ((store(K_HOMETAB) || "cog") === "cog" && window.SKCT_COG) {
       var f = document.createDocumentFragment();
       f.appendChild(appbar());
       var w = el("div", { class: "wrap" });

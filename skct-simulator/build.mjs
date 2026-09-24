@@ -15,6 +15,7 @@ const bank = read("assets/bank.js");
 const app = read("assets/app.js");
 const cogExams = [1, 2, 3, 4, 5].flatMap((n) => [read(`assets/cog-exams/exam${n}.js`), read(`assets/cog-exams/exam${n}-b.js`)]);
 const cogBank = read("assets/cognitive-bank.js");
+const cogGuide = read("assets/cog-guide.js");
 const cog = read("assets/cognitive.js");
 const html = read("index.html");
 
@@ -32,6 +33,7 @@ const inlined = [
   `<script>\n${app}\n</script>`,
   ...cogExams.map((src) => `<script>\n${src}\n</script>`),
   `<script>\n${cogBank}\n</script>`,
+  `<script>\n${cogGuide}\n</script>`,
   `<script>\n${cog}\n</script>`
 ].join("\n");
 

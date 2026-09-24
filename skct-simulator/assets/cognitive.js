@@ -155,6 +155,235 @@
 
   function togglePause() { if (cog.session && cog.session.paused) resume(); else pause(); }
 
+  /* ---------------- 개념 및 치트키 정리 ---------------- */
+
+  var GUIDE = window.SKCT_COG_GUIDE || [];
+  var guideUI = { area: "all", open: {} };
+
+  /* 지금까지의 응시 기록에서 유형군별 정답률을 모은다. 카드에 내 성적을 붙여 두면
+     어느 개념부터 볼지 고르는 데 쓸 수 있다. */
+  function myGroupStats() {
+    var acc = {};
+    histList().forEach(function (h) {
+      if (!h.full || !h.full.groups) return;
+      h.full.groups.forEach(function (g) {
+        var a = acc[g.group] = acc[g.group] || { correct: 0, total: 0 };
+        a.correct += g.correct;
+        a.total += g.total;
+      });
+    });
+    Object.keys(acc).forEach(function (k) {
+      acc[k].rate = acc[k].total ? Math.round(acc[k].correct / acc[k].total * 100) : null;
+    });
+    return acc;
+  }
+
+  function guideTable(t) {
+    return el("div", { class: "material" }, [
+      el("div", { class: "material-label", text: t.label }),
+      t.unit ? el("div", { class: "material-unit", text: t.unit }) : null,
+      el("div", { class: "tablescroll" }, [
+        el("table", { class: "datatable" }, [
+          el("thead", {}, [el("tr", {}, t.head.map(function (h, i) {
+            return el("th", { class: i ? "num" : "", text: h });
+          }))]),
+          el("tbody", {}, t.rows.map(function (r) {
+            return el("tr", {}, r.map(function (c, i) { return el("td", { class: i ? "num" : "", text: c }); }));
+          }))
+        ])
+      ])
+    ]);
+  }
+
+  function drillNode(d, n) {
+    var box = el("div", { class: "gdrill" });
+    box.appendChild(el("div", { class: "gdrill-head" }, [
+      el("span", { class: "gdrill-no", text: "예상문제 " + n }),
+      el("span", { class: "gdrill-hint", text: "선택지를 누르면 정답과 해설이 나온다" })
+    ]));
+    box.appendChild(el("p", { class: "gdrill-q", text: d.q }));
+    if (d.table) box.appendChild(guideTable(d.table));
+
+    var verdict = el("div", { class: "gverdict" });
+    var explain = el("div", { class: "gexplain" }, [
+      el("b", { text: "해설" }),
+      el("p", { text: d.explain })
+    ]);
+    var reveal = el("div", { class: "greveal" }, [verdict, explain]);
+    reveal.style.display = "none";
+
+    var btns = [];
+    var choices = el("div", { class: "gchoices" });
+    d.choices.forEach(function (c, i) {
+      var b = el("button", { class: "gchoice", type: "button" }, [
+        el("span", { class: "gchoice-no", text: CIRCLED[i] }),
+        el("span", { class: "gchoice-text", text: c })
+      ]);
+      b.addEventListener("click", function () { show(i); });
+      btns.push(b);
+      choices.appendChild(b);
+    });
+
+    var showBtn = el("button", { class: "linkbtn gdrill-show", type: "button", text: "그냥 정답 보기" });
+    showBtn.addEventListener("click", function () { show(null); });
+
+    function show(picked) {
+      btns.forEach(function (b, i) {
+        b.classList.toggle("is-answer", i === d.answer);
+        b.classList.toggle("is-wrong", picked !== null && i === picked && i !== d.answer);
+      });
+      verdict.textContent = picked === null
+        ? "정답은 " + CIRCLED[d.answer] + " 번이다."
+        : (picked === d.answer ? "맞았다. 정답은 " + CIRCLED[d.answer] + " 번이다."
+                               : "틀렸다. 정답은 " + CIRCLED[d.answer] + " 번이다.");
+      verdict.className = "gverdict" + (picked === null ? "" : picked === d.answer ? " is-ok" : " is-no");
+      reveal.style.display = "";
+      showBtn.style.display = "none";
+    }
+
+    box.appendChild(choices);
+    box.appendChild(showBtn);
+    box.appendChild(reveal);
+    return box;
+  }
+
+  function guideCard(t, stats) {
+    var card = el("details", { class: "gcard" });
+    if (guideUI.open[t.id]) card.setAttribute("open", "");
+    card.addEventListener("toggle", function () { guideUI.open[t.id] = card.open; });
+
+    var st = stats[t.group];
+    var rateNode = null;
+    if (st && st.total) {
+      var cls = st.rate >= 70 ? "is-ok" : st.rate >= 50 ? "is-mid" : "is-low";
+      rateNode = el("span", { class: "gcard-rate " + cls, text: "내 정답률 " + st.rate + "%" });
+    }
+
+    card.appendChild(el("summary", { class: "gcard-head" }, [
+      el("span", { class: "gcard-sec", title: "결과 화면의 유형군 이름", text: t.group }),
+      el("span", { class: "gcard-name", text: t.name }),
+      rateNode,
+      el("span", { class: "gcard-open", text: "펼치기" })
+    ]));
+
+    var body = el("div", { class: "gcard-body" });
+
+    body.appendChild(el("div", { class: "gtypes" }, t.types.map(function (x) {
+      return el("span", { class: "gtype", text: x });
+    })));
+
+    body.appendChild(el("div", { class: "gblock" }, [
+      el("h4", { text: "개념" }),
+      el("p", { class: "gconcept", text: t.concept })
+    ]));
+
+    body.appendChild(el("div", { class: "gblock" }, [
+      el("h4", { text: "치트키" }),
+      el("ol", { class: "gcheats" }, t.cheats.map(function (c) {
+        return el("li", {}, [
+          el("span", { class: "gcheat-t", text: c.t }),
+          el("span", { class: "gcheat-d", text: c.d })
+        ]);
+      }))
+    ]));
+
+    body.appendChild(el("div", { class: "gblock" }, [
+      el("h4", { text: "예시 풀이" }),
+      el("div", { class: "gexample" }, [
+        el("p", { class: "gex-q", text: t.example.q }),
+        el("ol", { class: "gex-steps" }, t.example.steps.map(function (s) { return el("li", { text: s }); })),
+        el("p", { class: "gex-a" }, [
+          el("span", { class: "gex-a-lab", text: "답" }),
+          el("span", { text: t.example.a })
+        ])
+      ])
+    ]));
+
+    var drills = el("div", { class: "gblock" }, [el("h4", { text: "예상문제" })]);
+    t.drills.forEach(function (d, i) { drills.appendChild(drillNode(d, i + 1)); });
+    body.appendChild(drills);
+
+    card.appendChild(body);
+    return card;
+  }
+
+  function paintGuideList(list) {
+    var stats = myGroupStats();
+    list.textContent = "";
+    SECTIONS.forEach(function (sec) {
+      if (guideUI.area !== "all" && guideUI.area !== sec.code) return;
+      var topics = GUIDE.filter(function (t) { return t.area === sec.code; });
+      if (!topics.length) return;
+      var block = el("div", { class: "garea" });
+      block.appendChild(el("div", { class: "garea-head" }, [
+        el("h3", { text: sec.name }),
+        el("span", { class: "garea-meta", text: topics.length + "개 유형 · 예상문제 " +
+          topics.reduce(function (a, t) { return a + t.drills.length; }, 0) + "문항" })
+      ]));
+      topics.forEach(function (t) { block.appendChild(guideCard(t, stats)); });
+      list.appendChild(block);
+    });
+  }
+
+  function guideSection() {
+    var box = el("section", { class: "guide" });
+    var nDrills = GUIDE.reduce(function (a, t) { return a + t.drills.length; }, 0);
+    var nCheats = GUIDE.reduce(function (a, t) { return a + t.cheats.length; }, 0);
+
+    box.appendChild(el("div", { class: "eyebrow", text: "SKCT 인지역량검사 · 5영역 유형별 정리" }));
+    box.appendChild(el("h1", { text: "개념 및 치트키 정리" }));
+    box.appendChild(el("p", { class: "lede",
+      text: "영역마다 어떤 유형이 나오는지, 그 유형을 어떻게 빨리 푸는지를 한 장씩 정리했다. 유형을 펼치면 개념 · 치트키 · 예시 풀이 · 예상문제가 차례로 나온다. 예상문제는 선택지를 누르면 바로 채점되고 해설이 열린다. 카드 왼쪽에 적힌 이름은 결과 화면의 유형군과 같으므로, 채점 결과에서 약했던 유형군을 여기서 그대로 찾을 수 있다." }));
+    box.appendChild(el("div", { class: "hero-facts" }, [
+      el("span", { html: "유형 <b>" + GUIDE.length + "개</b>" }),
+      el("span", { html: "치트키 <b>" + nCheats + "개</b>" }),
+      el("span", { html: "예상문제 <b>" + nDrills + "문항</b>" }),
+      el("span", { html: "전 문항 <b>해설 제공</b>" })
+    ]));
+
+    var list = el("div", { class: "guide-list" });
+    var chips = el("div", { class: "guide-chips", role: "group", "aria-label": "영역 고르기" });
+    var defs = [{ code: "all", name: "전체" }].concat(SECTIONS.map(function (s) {
+      return { code: s.code, name: s.name };
+    }));
+    var chipBtns = [];
+    defs.forEach(function (d) {
+      var b = el("button", {
+        class: "gchip" + (guideUI.area === d.code ? " is-on" : ""),
+        type: "button", "aria-pressed": String(guideUI.area === d.code), text: d.name
+      });
+      b.addEventListener("click", function () {
+        guideUI.area = d.code;
+        chipBtns.forEach(function (x) {
+          var on = x.dataset.code === guideUI.area;
+          x.classList.toggle("is-on", on);
+          x.setAttribute("aria-pressed", String(on));
+        });
+        paintGuideList(list);
+      });
+      b.dataset.code = d.code;
+      chipBtns.push(b);
+      chips.appendChild(b);
+    });
+
+    var openAll = el("button", { class: "linkbtn", type: "button", text: "모두 펼치기" });
+    openAll.addEventListener("click", function () {
+      var shown = list.querySelectorAll("details.gcard");
+      var anyClosed = false;
+      for (var i = 0; i < shown.length; i++) if (!shown[i].open) anyClosed = true;
+      for (var j = 0; j < shown.length; j++) shown[j].open = anyClosed;
+      GUIDE.forEach(function (t) { guideUI.open[t.id] = anyClosed; });
+      openAll.textContent = anyClosed ? "모두 접기" : "모두 펼치기";
+    });
+
+    box.appendChild(el("div", { class: "guide-bar" }, [chips, openAll]));
+    paintGuideList(list);
+    box.appendChild(list);
+    box.appendChild(el("p", { class: "guide-foot",
+      text: "예상문제는 개념을 확인하려고 만든 연습 문항이며 SKCT 기출이 아니다. 실전 난도는 아래 모의고사 쪽이 가깝다." }));
+    return box;
+  }
+
   /* ---------------- 홈(인지역량 탭) ---------------- */
 
   function homeBody(wrap) {
@@ -163,17 +392,23 @@
     var doneSets = {};
     hist.forEach(function (h) { doneSets[h.setId] = doneSets[h.setId] || h; });
 
-    wrap.appendChild(el("div", { class: "hero" }, [
+    /* 개념 정리가 맨 위에 온다. 시험 전 훑어보기와 오답 복습의 출발점이기 때문이다. */
+    wrap.appendChild(guideSection());
+
+    var bankTotal = 0;
+    Object.keys(BANK).forEach(function (k) { bankTotal += BANK[k].length; });
+
+    wrap.appendChild(el("div", { class: "hero hero-sub" }, [
       el("div", { class: "eyebrow", text: "SK그룹 종합역량검사 · 인지역량검사 대비" }),
-      el("h1", { text: "정답이 있는 검사. 시간을 멈춰 가며 풀 수도 있다" }),
+      el("h2", { text: "정답이 있는 검사. 시간을 멈춰 가며 풀 수도 있다" }),
       el("p", {
         class: "lede",
-        text: "언어이해·수리·추리 세 영역을 실제 시험과 같은 형식으로 푼다. 심층역량검사와 달리 정답이 있으므로 채점되고, 모든 문항에 해설이 붙는다. 응시 중 언제든 시간을 멈췄다가 다시 시작할 수 있어, 실전 연습과 학습용 풀이 어느 쪽으로도 쓸 수 있다."
+        text: "기술사무직 유형의 다섯 영역인 언어이해·자료해석·창의수리·언어추리·수열추리를 실제 시험과 같은 순서로 푼다. 심층역량검사와 달리 정답이 있으므로 채점되고, 모든 문항에 해설이 붙는다. 응시 중 언제든 시간을 멈췄다가 다시 시작할 수 있어, 실전 연습과 학습용 풀이 어느 쪽으로도 쓸 수 있다."
       }),
       el("div", { class: "hero-facts" }, [
-        el("span", { html: "문항 <b>60개</b>" }),
-        el("span", { html: "영역 <b>언어·수리·추리</b>" }),
-        el("span", { html: "검사 세트 <b>5종</b>" }),
+        el("span", { html: "문항 <b>" + bankTotal + "개</b>" }),
+        el("span", { html: "영역 <b>" + SECTIONS.length + "개</b>" }),
+        el("span", { html: "검사 세트 <b>" + SETS.length + "종</b>" }),
         el("span", { html: "전 문항 <b>해설 제공</b>" })
       ])
     ]));
