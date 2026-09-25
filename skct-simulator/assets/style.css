@@ -861,6 +861,16 @@ details.review[open] > summary .caret { color: var(--accent-ink); }
 .datatable td { padding: 9px 14px; border: 1px solid var(--line-2); }
 .datatable .num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .datatable th.num { text-align: right; }
+.material-caption {
+  font-size: 13.5px; font-weight: 650; color: var(--ink-2);
+  margin: 14px 0 6px;
+}
+.material-caption:first-of-type { margin-top: 0; }
+.material-note {
+  font-size: 12.5px; line-height: 1.7; color: var(--ink-3);
+  margin-top: 8px; padding-left: 2px;
+}
+.datatable tr.is-sum td { background: var(--surface-2); font-weight: 650; }
 @media (max-width: 720px) { .material { padding: 16px; } }
 
 /* 문제·선택지 */

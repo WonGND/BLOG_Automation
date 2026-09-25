@@ -711,6 +711,26 @@
 
   /* ---------------- 응시 화면 ---------------- */
 
+  function tableNode(t) {
+    var frag = document.createDocumentFragment();
+    if (t.caption) frag.appendChild(el("div", { class: "material-caption", text: t.caption }));
+    if (t.unit) frag.appendChild(el("div", { class: "material-unit", text: t.unit }));
+    frag.appendChild(el("div", { class: "tablescroll" }, [
+      el("table", { class: "datatable" }, [
+        el("thead", {}, [el("tr", {}, t.head.map(function (h, i) {
+          return el("th", { class: i ? "num" : "", text: h });
+        }))]),
+        el("tbody", {}, t.rows.map(function (r) {
+          /* 합계·소계 행은 옅은 배경으로 구분해 둔다 — 실제 자료의 생김새에 가깝다. */
+          var sum = /^(합계|계|소계|전체|총계)/.test(String(r[0]));
+          return el("tr", { class: sum ? "is-sum" : "" },
+            r.map(function (c, i) { return el("td", { class: i ? "num" : "", text: c }); }));
+        }))
+      ])
+    ]));
+    return frag;
+  }
+
   function materialNode(mat) {
     if (!mat) return null;
     var box = el("div", { class: "material" });
@@ -718,21 +738,13 @@
     if (mat.kind === "passage") {
       box.appendChild(el("p", { class: "material-text", text: mat.text }));
     } else if (mat.kind === "table") {
-      if (mat.unit) box.appendChild(el("div", { class: "material-unit", text: mat.unit }));
-      box.appendChild(el("div", { class: "tablescroll" }, [
-        el("table", { class: "datatable" }, [
-          el("thead", {}, [el("tr", {}, mat.head.map(function (h, i) {
-            return el("th", { class: i ? "num" : "", text: h });
-          }))]),
-          el("tbody", {}, mat.rows.map(function (r) {
-            return el("tr", {}, r.map(function (c, i) { return el("td", { class: i ? "num" : "", text: c }); }));
-          }))
-        ])
-      ]));
+      /* tables가 있으면 표를 여러 개 얹는다 — 두 자료를 엮어 푸는 문항에 쓴다. */
+      (mat.tables || [mat]).forEach(function (t) { box.appendChild(tableNode(t)); });
     } else if (mat.kind === "chart") {
       if (mat.unit) box.appendChild(el("div", { class: "material-unit", text: mat.unit }));
       chartInto(box, mat);
     }
+    if (mat.note) box.appendChild(el("div", { class: "material-note", text: mat.note }));
     return box;
   }
 
