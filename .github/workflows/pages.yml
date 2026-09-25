@@ -1,0 +1,62 @@
+name: Deploy Pages
+
+# skct-simulator를 GitHub Pages로 배포한다.
+# configure-pages의 enablement 옵션이 저장소의 Pages를 자동으로 켜 주므로,
+# 이 워크플로가 main에서 한 번 성공하면 Settings에서 따로 만질 것이 없다.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "skct-simulator/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 단일 파일 빌드
+        run: node build.mjs
+        working-directory: skct-simulator
+
+      - name: 산출물 확인
+        run: |
+          test -f skct-simulator/index.html
+          test -f skct-simulator/dist/index.html
+          test -f skct-simulator/assets/app.js
+          node --check skct-simulator/assets/app.js
+          node --check skct-simulator/assets/bank.js
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: skct-simulator
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
