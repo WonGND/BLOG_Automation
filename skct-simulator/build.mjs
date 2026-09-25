@@ -13,7 +13,7 @@ const read = (p) => readFileSync(resolve(here, p), "utf8");
 const css = read("assets/style.css");
 const bank = read("assets/bank.js");
 const app = read("assets/app.js");
-const cogExams = [1, 2, 3, 4, 5].flatMap((n) => [read(`assets/cog-exams/exam${n}.js`), read(`assets/cog-exams/exam${n}-b.js`)]);
+const cogExams = [1, 2, 3, 4, 5].map((n) => read(`assets/cog-exams/exam${n}.js`));
 const cogBank = read("assets/cognitive-bank.js");
 const cogGuide = read("assets/cog-guide.js");
 const cog = read("assets/cognitive.js");

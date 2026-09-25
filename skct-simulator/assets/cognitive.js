@@ -35,28 +35,24 @@
      약점을 읽으려면 유형군 단위로 묶어야 한다. */
   var TYPE_GROUP = {
     /* 언어이해 */
-    "유의어":"어휘·어법","반의어":"어휘·어법","어휘관계":"어휘·어법","다의어":"어휘·어법",
-    "어법":"어휘·어법","속담":"어휘·어법","한자성어":"어휘·어법","중의성":"어휘·어법","어휘추리":"어휘·어법",
-    "빈칸추론":"독해·문맥","문장배열":"독해·문맥","접속어":"독해·문맥","주제파악":"독해·문맥",
-    "내용일치":"독해·문맥","요약":"독해·문맥",
-    "추론":"비판적 독해","논지약화":"비판적 독해","적용":"비판적 독해","논리오류":"비판적 독해",
+    "문장배열": "글의 구조", "빈칸추론": "글의 구조", "서술방식": "글의 구조",
+    "주제파악": "주제·제목·요약", "제목": "주제·제목·요약", "요약": "주제·제목·요약",
+    "내용일치": "독해·추론", "추론": "독해·추론", "적용": "독해·추론",
     /* 자료해석 */
-    "자료해석":"자료해석",
+    "자료해석": "수치 계산", "그래프분석": "수치 계산",
+    "표분석": "표·그래프 판단", "모두고르시오": "표·그래프 판단",
     /* 창의수리 */
-    "방정식":"수·식 계산","부등식":"수·식 계산","비례":"수·식 계산","비율":"수·식 계산",
-    "평균":"수·식 계산","집합":"수·식 계산","집합추리":"수·식 계산","나이":"수·식 계산",
-    "날짜":"수·식 계산","시간계산":"수·식 계산","수열":"수·식 계산",
-    "농도":"속도·농도·일률","일률":"속도·농도·일률","거리속도":"속도·농도·일률","톱니바퀴":"속도·농도·일률",
-    "확률":"확률·경우의 수","경우의수":"확률·경우의 수",
-    "원가할인":"원가·도형","도형":"원가·도형","시계각":"원가·도형","최적화":"원가·도형","응용계산":"원가·도형",
+    "방정식": "방정식·비례·평균", "비례": "방정식·비례·평균", "평균": "방정식·비례·평균",
+    "농도": "농도·일률·속도", "일률": "농도·일률·속도", "거리속도": "농도·일률·속도",
+    "확률": "확률·경우의 수", "경우의수": "확률·경우의 수",
+    "원가할인": "원가·할인·이익",
     /* 언어추리 */
-    "명제·대우":"명제·논리","삼단논법":"명제·논리","명제연쇄":"명제·논리","명제추론":"명제·논리",
-    "조건추리":"조건·배치추리","순서추리":"조건·배치추리","배치추리":"조건·배치추리",
-    "매칭추리":"조건·배치추리","수리추리":"조건·배치추리",
-    "참거짓":"참·거짓",
+    "명제·대우": "명제·논리", "삼단논법": "명제·논리", "명제연쇄": "명제·논리", "명제추론": "명제·논리",
+    "조건추리": "조건·순서·배치", "순서추리": "조건·순서·배치", "배치추리": "조건·순서·배치",
+    "참거짓": "진실게임",
     /* 수열추리 */
-    "수규칙":"수 규칙","문자규칙":"문자 규칙","도식추리":"도식·대응규칙","대응규칙":"도식·대응규칙"
-  };
+    "수규칙": "수 규칙"
+  };;
   function groupOf(q) {
     return TYPE_GROUP[q.type] || (SEC_BY_CODE[q.sec] ? SEC_BY_CODE[q.sec].name : "기타");
   }
@@ -713,8 +709,90 @@
           }))
         ])
       ]));
+    } else if (mat.kind === "chart") {
+      if (mat.unit) box.appendChild(el("div", { class: "material-unit", text: mat.unit }));
+      chartInto(box, mat);
     }
     return box;
+  }
+
+  /* ---------------- 그래프 자료 ----------------
+   * 막대는 HTML·CSS로, 꺾은선은 선만 SVG로 그리고 점과 값은 HTML로 얹는다.
+   * 이렇게 하면 폭이 좁아져도 글자 크기가 그대로라 값을 읽을 수 있다.
+   * 계열 색은 --chart-1 / --chart-2 두 칸만 쓰며, 라이트·다크 각각 팔레트 검사를 통과한 값이다.
+   * 시험 자료이므로 모든 점에 값을 직접 붙인다. 값이 화면에 다 적혀 있어 마우스를 올려
+   * 값을 확인하는 층은 따로 두지 않았다. */
+  function fmtNum(v) { return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+
+  function chartInto(box, mat) {
+    var series = mat.series, multi = series.length > 1;
+    if (multi) {
+      box.appendChild(el("div", { class: "chart-legend" }, series.map(function (sr, i) {
+        return el("span", { class: "chart-lg" }, [
+          el("i", { class: "chart-sw s" + (i + 1) }), el("span", { text: sr.name })
+        ]);
+      })));
+    }
+    var all = [];
+    series.forEach(function (sr) { all = all.concat(sr.values); });
+    var top = Math.max.apply(null, all) * 1.15 || 1;
+
+    if (mat.chart === "line") {
+      var plot = el("div", { class: "chart chart-line" });
+      var n = mat.axis.length;
+      var xOf = function (i) { return n === 1 ? 50 : (i / (n - 1)) * 100; };
+      var yOf = function (v) { return 100 - (v / top) * 100; };
+      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 100 100");
+      svg.setAttribute("preserveAspectRatio", "none");
+      svg.setAttribute("aria-hidden", "true");
+      series.forEach(function (sr, si) {
+        var pl = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+        pl.setAttribute("points", sr.values.map(function (v, i) { return xOf(i) + "," + yOf(v); }).join(" "));
+        pl.setAttribute("class", "chart-path s" + (si + 1));
+        pl.setAttribute("vector-effect", "non-scaling-stroke");
+        svg.appendChild(pl);
+      });
+      plot.appendChild(svg);
+      series.forEach(function (sr, si) {
+        sr.values.forEach(function (v, i) {
+          plot.appendChild(el("span", { class: "chart-dot s" + (si + 1),
+            style: "left:" + xOf(i) + "%; top:" + yOf(v) + "%;" }));
+          /* 두 계열이 같은 값이면 점이 겹쳐 라벨이 서로를 가린다.
+             첫 계열은 점 위, 둘째 계열은 점 아래에 붙여 항상 둘 다 읽히게 한다. */
+          plot.appendChild(el("span", { class: "chart-val chart-val-line" + (si ? " is-below" : ""),
+            style: "left:" + xOf(i) + "%; top:" + yOf(v) + "%;", text: fmtNum(v) }));
+        });
+      });
+      box.appendChild(plot);
+      box.appendChild(el("div", { class: "chart-axis" }, mat.axis.map(function (a) {
+        return el("span", { text: a });
+      })));
+    } else {
+      var bars = el("div", { class: "chart chart-bar" });
+      mat.axis.forEach(function (a, i) {
+        bars.appendChild(el("div", { class: "chart-group" }, [
+          el("div", { class: "chart-cols" }, series.map(function (sr, si) {
+            return el("div", { class: "chart-col" }, [
+              el("span", { class: "chart-val", text: fmtNum(sr.values[i]) }),
+              el("span", { class: "chart-bar-fill s" + (si + 1),
+                style: "height:" + (sr.values[i] / top * 100).toFixed(2) + "%;",
+                title: sr.name + " " + fmtNum(sr.values[i]) })
+            ]);
+          })),
+          el("div", { class: "chart-cat", text: a })
+        ]));
+      });
+      box.appendChild(bars);
+    }
+  }
+
+  /* ㄱ·ㄴ·ㄷ 보기와 <보기> 사례를 담는 상자. 발문 바로 아래에 붙는다. */
+  function boxesNode(q) {
+    if (!q.boxes || !q.boxes.length) return null;
+    return el("div", { class: "qboxes" }, q.boxes.map(function (b) {
+      return el("p", { class: "qbox-line", text: b });
+    }));
   }
 
   function renderTest() {
@@ -792,7 +870,8 @@
     if (mat) card.appendChild(materialNode(mat));
 
     card.appendChild(el("div", { class: "stembox" }, [
-      el("p", { class: "stem", text: q.stem })
+      el("p", { class: "stem", text: q.stem }),
+      boxesNode(q)
     ]));
 
     var list = el("div", { class: "choicelist" });
@@ -1229,6 +1308,7 @@
           el("div", { class: "wn-body" }, [
             mat ? materialNode(mat) : null,
             el("p", { class: "stem", text: q.stem }),
+            boxesNode(q),
             el("div", { class: "wn-choices" }, q.choices.map(function (c, i) {
               return el("div", {
                 class: "wn-choice" + (i === q.answer ? " is-answer" : "") + (i === x.picked ? " is-picked" : "")
