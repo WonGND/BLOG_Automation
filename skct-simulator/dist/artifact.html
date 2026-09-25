@@ -1356,6 +1356,166 @@ details.review[open] > summary .caret { color: var(--accent-ink); }
 .qbox-line { font-size: 14.5px; line-height: 1.78; color: var(--ink); }
 .wn-body .qboxes { margin: 14px 18px 0; }
 
+/* ============================================================
+   확인창
+   ============================================================ */
+
+.modal-back {
+  position: fixed; inset: 0; z-index: 200;
+  display: grid; place-items: center;
+  padding: 20px;
+  background: color-mix(in srgb, #0b0f14 58%, transparent);
+  backdrop-filter: blur(2px);
+}
+.modal {
+  width: min(440px, 100%);
+  padding: 26px 26px 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  display: grid; gap: 11px;
+}
+.modal h2 { font-size: 19px; letter-spacing: -.01em; }
+.modal p { font-size: 14.5px; line-height: 1.78; color: var(--ink-2); }
+.modal-actions { display: flex; gap: 9px; justify-content: flex-end; flex-wrap: wrap; margin-top: 7px; }
+
+/* ============================================================
+   응시 도구 — 메모장 · 그림판 · 계산기
+   ============================================================ */
+
+.tooldock[hidden] { display: none; }   /* display를 지정하면 hidden 속성이 덮인다 */
+.tooldock {
+  position: fixed; right: 18px; bottom: 18px; z-index: 55;
+  display: flex; gap: 7px;
+  padding: 7px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadow-md);
+}
+.tooldock-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: none;
+  font-size: 13.5px; font-weight: 600; color: var(--ink-2);
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.tooldock-btn:hover { background: var(--surface-2); color: var(--ink); }
+.tooldock-btn.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tooldock-ico { font-size: 14px; line-height: 1; }
+
+.toolwin {
+  position: fixed; z-index: 60;
+  width: 360px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.toolwin[hidden] { display: none; }
+.toolwin:focus { outline: none; }
+.toolwin-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 9px 10px 9px 14px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.toolwin-head:active { cursor: grabbing; }
+.toolwin-title { font-family: var(--display); font-size: 13.5px; font-weight: 700; }
+.toolwin-x {
+  border: 0; background: none; cursor: pointer;
+  width: 26px; height: 26px; border-radius: var(--r-sm);
+  color: var(--ink-3); font-size: 13px; line-height: 1;
+}
+.toolwin-x:hover { background: var(--surface-3); color: var(--ink); }
+.toolwin-body { padding: 12px; }
+
+.toolbar-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 9px; }
+.toolbar-sep { width: 1px; height: 18px; background: var(--line); margin: 0 3px; }
+.toolbtn {
+  padding: 5px 10px;
+  border: 1px solid var(--line-2); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--ink-2);
+  font-size: 12.5px; cursor: pointer;
+}
+.toolbtn:hover { border-color: var(--accent); color: var(--accent-ink); }
+.toolbtn.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.toolsw {
+  width: 22px; height: 22px; padding: 0;
+  border: 2px solid var(--line-2); border-radius: 50%;
+  cursor: pointer;
+}
+.toolsw.is-on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--surface) inset; }
+
+.toolnote-wrap { display: grid; }
+.toolnote {
+  width: 100%; height: 240px;
+  padding: 11px 12px;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface-2); color: var(--ink);
+  font-family: var(--mono); font-size: 13px; line-height: 1.7;
+  resize: vertical;
+}
+.toolnote:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.tooldraw-wrap { display: grid; }
+.tooldraw {
+  width: 100%; height: auto; aspect-ratio: 560 / 360;
+  display: block;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: #ffffff;                      /* 그림은 늘 흰 바탕에 그린다 */
+  touch-action: none; cursor: crosshair;
+}
+
+.toolcalc { display: grid; gap: 9px; }
+.toolcalc-out {
+  padding: 12px 14px;
+  min-height: 52px;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface-2);
+  font-size: 24px; font-weight: 600; text-align: right;
+  overflow-x: auto; white-space: nowrap;
+}
+.toolcalc-pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.toolkey {
+  padding: 13px 0;
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--surface);
+  font-family: var(--mono); font-size: 16px; font-weight: 500;
+  cursor: pointer;
+}
+.toolkey:hover { background: var(--surface-2); }
+.toolkey.is-op { color: var(--accent-ink); font-weight: 600; }
+.toolkey.is-fn { background: var(--surface-2); font-size: 14px; color: var(--ink-2); }
+.toolkey.is-eq { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.toolkey.is-eq:hover { background: var(--accent-ink); }
+
+/* 좁은 화면 — 창을 아래에 붙이고 한 번에 하나만 연다 */
+@media (max-width: 720px) {
+  .tooldock { right: 10px; bottom: 10px; padding: 6px; }
+  .tooldock-btn { padding: 8px 11px; font-size: 12.5px; }
+  .tooldock-t { display: none; }
+  .tooldock-ico { font-size: 16px; }
+  .toolwin {
+    left: 8px !important; right: 8px;
+    top: auto !important; bottom: 74px;
+    width: auto;
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+  }
+  .toolwin-head { cursor: default; }
+  .toolnote { height: 180px; }
+}
+
 </style>
 <noscript>
   <div style="max-width:640px;margin:80px auto;padding:0 20px;font-family:system-ui,sans-serif;">
@@ -2163,6 +2323,46 @@ window.SKCT_SETS = [
     }
   });
 
+  /* ---------------- 확인창 ----------------
+   * window.confirm은 샌드박스된 iframe(아티팩트 등)에서 막혀 아무 일도 일어나지 않는다.
+   * 그래서 확인이 필요한 자리는 모두 이 창을 쓴다. */
+  function confirmBox(opt) {
+    var prev = document.activeElement;
+    var noBtn = el("button", { class: "btn", type: "button", text: opt.no || "아니오" });
+    var yesBtn = el("button", { class: "btn btn-primary", type: "button", text: opt.yes || "예" });
+    var box = el("div", { class: "modal", role: "alertdialog", "aria-modal": "true", "aria-labelledby": "modalttl" }, [
+      el("h2", { id: "modalttl", text: opt.title }),
+      opt.body ? el("p", { text: opt.body }) : null,
+      el("div", { class: "modal-actions" }, [noBtn, yesBtn])
+    ]);
+    var back = el("div", { class: "modal-back" }, [box]);
+
+    function close(fn) {
+      document.removeEventListener("keydown", onKey, true);
+      if (back.parentNode) back.parentNode.removeChild(back);
+      if (prev && prev.focus) { try { prev.focus(); } catch (e) {} }
+      if (fn) fn();
+    }
+    function onKey(e) {
+      if (e.key === "Escape") { e.preventDefault(); close(opt.onNo); return; }
+      if (e.key === "Tab") {                       /* 포커스를 창 안에 가둔다 */
+        var f = [noBtn, yesBtn];
+        var i = f.indexOf(document.activeElement);
+        e.preventDefault();
+        f[(i + (e.shiftKey ? f.length - 1 : 1) + f.length) % f.length].focus();
+        return;
+      }
+      /* 응시 화면 단축키가 창 뒤에서 도는 것을 막는다 */
+      e.stopPropagation();
+    }
+    noBtn.addEventListener("click", function () { close(opt.onNo); });
+    yesBtn.addEventListener("click", function () { close(opt.onYes); });
+    back.addEventListener("mousedown", function (e) { if (e.target === back) close(opt.onNo); });
+    document.addEventListener("keydown", onKey, true);
+    document.body.appendChild(back);
+    noBtn.focus();                                  /* 실수로 나가지 않도록 '아니오'에 먼저 둔다 */
+  }
+
   /* ---------------- 홈 ---------------- */
 
   function homeTabs() {
@@ -2398,11 +2598,14 @@ window.SKCT_SETS = [
       el("span", { class: "setcode", text: def.code }),
       timer,
       el("button", {
-        class: "iconbtn", type: "button", text: "중단",
+        class: "iconbtn", type: "button", text: "나가기",
         onclick: function () {
-          if (confirm("검사를 중단하고 홈으로 돌아간다. 진행 상황은 저장되어 나중에 이어서 응시할 수 있다.")) {
-            saveSession(); stopTimer(); go("home");
-          }
+          confirmBox({
+            title: "정말 나가시겠습니까?",
+            body: "지금까지 응답한 내용과 남은 시간은 저장된다. 홈에서 '이어서 응시'를 누르면 멈춘 지점부터 다시 시작한다.",
+            yes: "예, 나갑니다", no: "아니오, 계속 풉니다",
+            onYes: function () { saveSession(); stopTimer(); go("home"); }
+          });
         }
       })
     ]));
@@ -3151,12 +3354,344 @@ window.SKCT_SETS = [
     store: store, storageOK: function () { return storageOK; },
     toast: toast, appbar: appbar, go: go, render: render,
     download: download, copyText: copyText, buildCSVLine: null,
+    confirmBox: confirmBox,
     percentileOf: percentileOf, erf: erf,
     state: state
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
+})();
+
+</script>
+<script>
+/* 응시 중 쓰는 도구 — 메모장 · 그림판 · 계산기
+ * 실제 SKCT 응시 화면에서 제공되는 세 가지를 같은 형태로 올린다.
+ * 창은 #app 바깥(document.body)에 붙는다. 문항을 넘길 때마다 화면을 다시 그리는데,
+ * 창이 #app 안에 있으면 그때마다 적어 둔 메모와 그림이 날아가기 때문이다.
+ */
+(function () {
+  "use strict";
+
+  var S = window.SKCT;
+  if (!S) return;
+  var el = S.el, store = S.store;
+
+  var K_NOTE = "skct.tools.v1.note";
+  var K_DRAW = "skct.tools.v1.draw";
+
+  var dock = null, wins = {}, z = 60, built = false;
+
+  function narrow() { return window.innerWidth <= 720; }
+
+  /* ---------------- 창 ---------------- */
+
+  function makeWin(key, title, bodyNode, pos) {
+    var head = el("div", { class: "toolwin-head" }, [
+      el("span", { class: "toolwin-title", text: title }),
+      el("button", { class: "toolwin-x", type: "button", "aria-label": title + " 닫기", text: "✕",
+        onclick: function () { toggle(key, false); } })
+    ]);
+    var win = el("div", {
+      class: "toolwin toolwin-" + key, tabindex: "-1",
+      role: "dialog", "aria-label": title,
+      style: "left:" + pos[0] + "px; top:" + pos[1] + "px;"
+    }, [head, el("div", { class: "toolwin-body" }, [bodyNode])]);
+    win.hidden = true;
+
+    /* 머리글을 잡아 옮긴다 */
+    var drag = null;
+    head.addEventListener("pointerdown", function (e) {
+      if (e.target.closest(".toolwin-x") || narrow()) return;
+      var r = win.getBoundingClientRect();
+      drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+      head.setPointerCapture(e.pointerId);
+      raise(win);
+    });
+    head.addEventListener("pointermove", function (e) {
+      if (!drag) return;
+      var w = win.offsetWidth, h = win.offsetHeight;
+      var x = Math.min(Math.max(0, e.clientX - drag.dx), window.innerWidth - w);
+      var y = Math.min(Math.max(0, e.clientY - drag.dy), window.innerHeight - 40);
+      win.style.left = x + "px";
+      win.style.top = y + "px";
+    });
+    head.addEventListener("pointerup", function () { drag = null; });
+    head.addEventListener("pointercancel", function () { drag = null; });
+    win.addEventListener("pointerdown", function () { raise(win); });
+    return win;
+  }
+  function raise(win) { z++; win.style.zIndex = String(z); }
+
+  function toggle(key, on) {
+    var win = wins[key];
+    if (!win) return;
+    var show = on === undefined ? win.hidden : on;
+    /* 좁은 화면에서는 창이 화면을 다 덮으므로 한 번에 하나만 연다 */
+    if (show && narrow()) Object.keys(wins).forEach(function (k) { if (k !== key) toggle(k, false); });
+    win.hidden = !show;
+    if (show) {
+      raise(win);
+      var inner = win.querySelector(".toolcalc, .toolnote") || win;
+      inner.focus();
+      if (key === "draw") fitCanvas();
+    }
+    dockBtns[key].classList.toggle("is-on", show);
+    dockBtns[key].setAttribute("aria-pressed", String(show));
+  }
+
+  /* ---------------- 메모장 ---------------- */
+
+  function buildNote() {
+    var ta = el("textarea", {
+      class: "toolnote", spellcheck: "false", "aria-label": "메모장",
+      placeholder: "조건을 옮겨 적거나 계산 과정을 남겨 둔다. 이 브라우저에만 저장된다."
+    });
+    ta.value = store(K_NOTE) || "";
+    var timer = null;
+    ta.addEventListener("input", function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () { store(K_NOTE, ta.value); }, 400);
+    });
+    return el("div", { class: "toolnote-wrap" }, [
+      ta,
+      el("div", { class: "toolbar-row" }, [
+        el("button", { class: "toolbtn", type: "button", text: "전체 지우기",
+          onclick: function () { ta.value = ""; store(K_NOTE, ""); ta.focus(); } })
+      ])
+    ]);
+  }
+
+  /* ---------------- 그림판 ---------------- */
+
+  var canvas = null, ctx = null, sized = false, pen = { color: "#111111", size: 2, erase: false };
+
+  /* 캔버스는 만들 때 크기를 주고, 준비는 한 번만 한다.
+     canvas.width는 지정하지 않아도 300이라 그 값으로 '이미 준비됐는지'를 판단할 수 없다.
+     또 width를 다시 대입하면 그려 둔 그림이 지워진다. */
+  function fitCanvas() {
+    if (!canvas || sized) return;
+    sized = true;
+    ctx = canvas.getContext("2d");
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    var saved = store(K_DRAW);
+    if (saved) {
+      var img = new Image();
+      img.onload = function () { ctx.drawImage(img, 0, 0); };
+      img.src = saved;
+    }
+  }
+  function saveDraw() {
+    try { store(K_DRAW, canvas.toDataURL("image/png")); } catch (e) { /* 저장 공간이 없으면 그냥 둔다 */ }
+  }
+  function buildDraw() {
+    canvas = el("canvas", { class: "tooldraw", width: "560", height: "360", "aria-label": "그림판" });
+    var drawing = false, last = null;
+    function at(e) {
+      var r = canvas.getBoundingClientRect();
+      return { x: (e.clientX - r.left) * (canvas.width / r.width),
+               y: (e.clientY - r.top) * (canvas.height / r.height) };
+    }
+    function stroke(p) {
+      ctx.strokeStyle = pen.erase ? "#ffffff" : pen.color;
+      ctx.lineWidth = pen.erase ? pen.size * 6 : pen.size;
+      ctx.globalCompositeOperation = pen.erase ? "destination-out" : "source-over";
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      last = p;
+    }
+    canvas.addEventListener("pointerdown", function (e) {
+      fitCanvas();
+      drawing = true; last = at(e);
+      canvas.setPointerCapture(e.pointerId);
+      stroke(at(e));
+      e.preventDefault();
+    });
+    canvas.addEventListener("pointermove", function (e) { if (drawing) { stroke(at(e)); e.preventDefault(); } });
+    ["pointerup", "pointercancel", "pointerleave"].forEach(function (t) {
+      canvas.addEventListener(t, function () { if (drawing) { drawing = false; saveDraw(); } });
+    });
+
+    function swatch(color) {
+      return el("button", {
+        class: "toolsw" + (pen.color === color && !pen.erase ? " is-on" : ""),
+        type: "button", "aria-label": "색 " + color, style: "background:" + color + ";",
+        onclick: function (e) {
+          pen.color = color; pen.erase = false;
+          syncDrawBar(e.target.closest(".toolbar-row"));
+        }
+      });
+    }
+    function sizeBtn(n, label) {
+      return el("button", { class: "toolbtn tool-size" + (pen.size === n ? " is-on" : ""), type: "button",
+        "data-size": String(n), text: label,
+        onclick: function (e) { pen.size = n; syncDrawBar(e.target.closest(".toolbar-row")); } });
+    }
+    var eraseBtn = el("button", { class: "toolbtn tool-erase", type: "button", text: "지우개",
+      onclick: function (e) { pen.erase = !pen.erase; syncDrawBar(e.target.closest(".toolbar-row")); } });
+
+    var bar = el("div", { class: "toolbar-row" }, [
+      swatch("#111111"), swatch("#2a78d6"), swatch("#c9541f"),
+      el("span", { class: "toolbar-sep" }),
+      sizeBtn(2, "가늘게"), sizeBtn(4, "보통"), sizeBtn(8, "굵게"),
+      el("span", { class: "toolbar-sep" }),
+      eraseBtn,
+      el("button", { class: "toolbtn", type: "button", text: "전체 지우기",
+        onclick: function () {
+          fitCanvas();
+          ctx.globalCompositeOperation = "source-over";
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          saveDraw();
+        } })
+    ]);
+    return el("div", { class: "tooldraw-wrap" }, [canvas, bar]);
+  }
+  function syncDrawBar(bar) {
+    if (!bar) return;
+    [].forEach.call(bar.querySelectorAll(".toolsw"), function (b) {
+      b.classList.toggle("is-on", !pen.erase && b.style.background.indexOf(hexToRgb(pen.color)) >= 0);
+    });
+    [].forEach.call(bar.querySelectorAll(".tool-size"), function (b) {
+      b.classList.toggle("is-on", Number(b.dataset.size) === pen.size);
+    });
+    var er = bar.querySelector(".tool-erase");
+    if (er) { er.classList.toggle("is-on", pen.erase); er.setAttribute("aria-pressed", String(pen.erase)); }
+  }
+  function hexToRgb(h) {
+    var n = parseInt(h.slice(1), 16);
+    return "rgb(" + ((n >> 16) & 255) + ", " + ((n >> 8) & 255) + ", " + (n & 255) + ")";
+  }
+
+  /* ---------------- 계산기 ---------------- */
+
+  var calc = { cur: "0", acc: null, op: null, fresh: true }, calcOut = null;
+
+  function calcShow() { if (calcOut) calcOut.textContent = calc.cur; }
+  function calcDigit(d) {
+    if (calc.fresh) { calc.cur = d === "." ? "0." : d; calc.fresh = false; }
+    else if (d === "." ) { if (calc.cur.indexOf(".") < 0) calc.cur += "."; }
+    else if (calc.cur === "0") calc.cur = d;
+    else if (calc.cur.replace(/[^0-9]/g, "").length < 12) calc.cur += d;
+    calcShow();
+  }
+  function apply(a, b, op) {
+    if (op === "+") return a + b;
+    if (op === "−") return a - b;
+    if (op === "×") return a * b;
+    if (op === "÷") return b === 0 ? NaN : a / b;
+    return b;
+  }
+  function fmt(v) {
+    if (!isFinite(v)) return "오류";
+    var r = Math.round(v * 1e10) / 1e10;
+    return String(r).length > 14 ? r.toPrecision(10).replace(/\.?0+e/, "e") : String(r);
+  }
+  function calcOp(op) {
+    var v = parseFloat(calc.cur);
+    if (calc.op !== null && !calc.fresh) { v = apply(calc.acc, v, calc.op); calc.cur = fmt(v); calcShow(); }
+    calc.acc = isFinite(v) ? v : 0;
+    calc.op = op; calc.fresh = true;
+  }
+  function calcEq() {
+    if (calc.op === null) { calc.fresh = true; return; }
+    var v = apply(calc.acc, parseFloat(calc.cur), calc.op);
+    calc.cur = fmt(v); calc.acc = null; calc.op = null; calc.fresh = true;
+    calcShow();
+  }
+  function calcClear() { calc = { cur: "0", acc: null, op: null, fresh: true }; calcShow(); }
+  function calcBack() {
+    if (calc.fresh) return;
+    calc.cur = calc.cur.length > 1 ? calc.cur.slice(0, -1) : "0";
+    if (calc.cur === "-" ) calc.cur = "0";
+    calcShow();
+  }
+  function calcSign() {
+    calc.cur = calc.cur.charAt(0) === "-" ? calc.cur.slice(1) : "-" + calc.cur;
+    calcShow();
+  }
+  function calcPct() { calc.cur = fmt(parseFloat(calc.cur) / 100); calc.fresh = false; calcShow(); }
+
+  function buildCalc() {
+    calcOut = el("div", { class: "toolcalc-out num", role: "status", "aria-live": "polite", text: "0" });
+    var keys = [
+      ["C", calcClear, "fn"], ["⌫", calcBack, "fn"], ["%", calcPct, "fn"], ["÷", function () { calcOp("÷"); }, "op"],
+      ["7", null], ["8", null], ["9", null], ["×", function () { calcOp("×"); }, "op"],
+      ["4", null], ["5", null], ["6", null], ["−", function () { calcOp("−"); }, "op"],
+      ["1", null], ["2", null], ["3", null], ["+", function () { calcOp("+"); }, "op"],
+      ["±", calcSign, "fn"], ["0", null], [".", null], ["=", calcEq, "eq"]
+    ];
+    var pad = el("div", { class: "toolcalc-pad" }, keys.map(function (k) {
+      return el("button", {
+        class: "toolkey" + (k[2] ? " is-" + k[2] : ""), type: "button", text: k[0],
+        onclick: k[1] || function () { calcDigit(k[0]); }
+      });
+    }));
+    /* 키보드로 두드리려면 포커스를 받을 수 있어야 한다. 창을 열 때 여기로 포커스를 준다. */
+    var wrap = el("div", { class: "toolcalc", tabindex: "0", "aria-label": "계산기" }, [calcOut, pad]);
+    /* 창 안에서는 키보드로도 두드릴 수 있게 한다 */
+    wrap.addEventListener("keydown", function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      var k = e.key;
+      if (/^[0-9.]$/.test(k)) { calcDigit(k); }
+      else if (k === "+" || k === "-" || k === "*" || k === "/") {
+        calcOp({ "+": "+", "-": "−", "*": "×", "/": "÷" }[k]);
+      }
+      else if (k === "Enter" || k === "=") calcEq();
+      else if (k === "Backspace") calcBack();
+      else if (k === "Escape" || k === "c" || k === "C") calcClear();
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    return wrap;
+  }
+
+  /* ---------------- 도크 ---------------- */
+
+  var dockBtns = {};
+  var DEFS = [
+    { key: "note", title: "메모장", icon: "✎", build: buildNote, pos: [null, 90] },
+    { key: "draw", title: "그림판", icon: "✐", build: buildDraw, pos: [null, 150] },
+    { key: "calc", title: "계산기", icon: "＋", build: buildCalc, pos: [null, 210] }
+  ];
+
+  function build() {
+    if (built) return;
+    built = true;
+    var right = 24;
+    DEFS.forEach(function (d, i) {
+      var x = Math.max(16, window.innerWidth - 360 - right - i * 28);
+      wins[d.key] = makeWin(d.key, d.title, d.build(), [x, d.pos[1]]);
+      document.body.appendChild(wins[d.key]);
+    });
+    dock = el("div", { class: "tooldock", role: "group", "aria-label": "응시 도구" },
+      DEFS.map(function (d) {
+        var b = el("button", {
+          class: "tooldock-btn", type: "button", "aria-pressed": "false",
+          title: d.title, onclick: function () { toggle(d.key); }
+        }, [
+          el("span", { class: "tooldock-ico", "aria-hidden": "true", text: d.icon }),
+          el("span", { class: "tooldock-t", text: d.title })
+        ]);
+        dockBtns[d.key] = b;
+        return b;
+      }));
+    dock.hidden = true;
+    document.body.appendChild(dock);
+  }
+
+  /* 응시 화면에서만, 그리고 시간이 흐르는 동안에만 쓸 수 있다.
+     멈춰 놓고 계산기를 두드릴 수 있으면 일시정지가 공짜 시간이 된다. */
+  function setActive(on) {
+    build();
+    if (dock.hidden === !on) return;
+    dock.hidden = !on;
+    if (!on) Object.keys(wins).forEach(function (k) { toggle(k, false); });
+  }
+
+  window.SKCT_TOOLS = { setActive: setActive };
 })();
 
 </script>
@@ -6948,6 +7483,23 @@ window.SKCT_SETS = [
 
   function togglePause() { if (cog.session && cog.session.paused) resume(); else pause(); }
 
+  /* 나가기 — 확인하는 동안 시간이 흐르면 안 되므로 먼저 멈춘다.
+     '아니오'를 고르면 멈추기 전 상태로 되돌린다. */
+  function leaveTest() {
+    var s = cog.session;
+    if (!s || cog.submitting) return;
+    var wasRunning = !s.paused;
+    if (wasRunning) pause();
+    S.confirmBox({
+      title: "정말 나가시겠습니까?",
+      body: "시간은 멈춰 두었다. 지금까지 푼 내용과 남은 시간은 저장되며, 홈에서 '이어서 응시'를 누르면 멈춘 지점부터 다시 시작한다.",
+      yes: "예, 나갑니다",
+      no: "아니오, 계속 풉니다",
+      onYes: function () { flushQuestionTime(); saveSession(); stopTimer(); go("home"); },
+      onNo: function () { if (wasRunning) resume(); }
+    });
+  }
+
   /* ---------------- 개념 및 치트키 정리 ---------------- */
 
   var GUIDE = window.SKCT_COG_GUIDE || [];
@@ -7429,9 +7981,12 @@ window.SKCT_SETS = [
       el("button", {
         class: "iconbtn", type: "button", text: "나가기",
         onclick: function () {
-          if (confirm("검사를 나간다. 진행 상황은 저장되어 나중에 이어서 응시할 수 있다.")) {
-            saveSession(); stopTimer(); go("home");
-          }
+          S.confirmBox({
+            title: "정말 나가시겠습니까?",
+            body: "여기까지의 응답은 저장된다. 홈에서 '이어서 응시'를 누르면 이 교시부터 다시 시작한다.",
+            yes: "예, 나갑니다", no: "아니오, 계속 풉니다",
+            onYes: function () { saveSession(); stopTimer(); go("home"); }
+          });
         }
       })
     ]));
@@ -7618,13 +8173,7 @@ window.SKCT_SETS = [
       }),
       el("button", {
         class: "iconbtn", type: "button", text: "나가기",
-        onclick: function () {
-          if (confirm("검사를 나간다. 진행 상황은 저장되어 나중에 이어서 응시할 수 있다.")) {
-            flushQuestionTime();
-            if (!s.paused) { s.carryMs = partElapsedMs(); s.paused = true; s.startedAt = null; }
-            saveSession(); stopTimer(); go("home");
-          }
-        }
+        onclick: leaveTest
       })
     ]));
 
@@ -8257,6 +8806,8 @@ window.SKCT_SETS = [
 
   document.addEventListener("keydown", function (e) {
     if (S.state.screen !== "cog-test" || !cog.session || cog.submitting) return;
+    if (document.querySelector(".modal-back")) return;          /* 확인창이 떠 있다 */
+    if (e.target && e.target.closest && e.target.closest(".toolwin")) return;   /* 메모장·계산기 안 */
     if (e.metaKey || e.ctrlKey || e.altKey || !e.key) return;
     var tag = (e.target.tagName || "").toLowerCase();
     if (tag === "input" || tag === "textarea" || e.target.isContentEditable) return;
@@ -8291,12 +8842,14 @@ window.SKCT_SETS = [
       return null;
     },
     afterRender: function (screen) {
-      if (screen === "cog-test" && cog.session && !cog.session.paused) {
+      var live = screen === "cog-test" && cog.session && !cog.session.paused;
+      if (live) {
         markQuestionEnter();
         startTimer();
       } else {
         stopTimer();
       }
+      if (window.SKCT_TOOLS) window.SKCT_TOOLS.setActive(!!live);
     },
     isBusy: function () {
       return !!(cog.session && !cog.session.paused && S.state.screen === "cog-test" && !cog.submitting);

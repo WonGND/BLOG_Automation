@@ -499,6 +499,46 @@
     }
   });
 
+  /* ---------------- 확인창 ----------------
+   * window.confirm은 샌드박스된 iframe(아티팩트 등)에서 막혀 아무 일도 일어나지 않는다.
+   * 그래서 확인이 필요한 자리는 모두 이 창을 쓴다. */
+  function confirmBox(opt) {
+    var prev = document.activeElement;
+    var noBtn = el("button", { class: "btn", type: "button", text: opt.no || "아니오" });
+    var yesBtn = el("button", { class: "btn btn-primary", type: "button", text: opt.yes || "예" });
+    var box = el("div", { class: "modal", role: "alertdialog", "aria-modal": "true", "aria-labelledby": "modalttl" }, [
+      el("h2", { id: "modalttl", text: opt.title }),
+      opt.body ? el("p", { text: opt.body }) : null,
+      el("div", { class: "modal-actions" }, [noBtn, yesBtn])
+    ]);
+    var back = el("div", { class: "modal-back" }, [box]);
+
+    function close(fn) {
+      document.removeEventListener("keydown", onKey, true);
+      if (back.parentNode) back.parentNode.removeChild(back);
+      if (prev && prev.focus) { try { prev.focus(); } catch (e) {} }
+      if (fn) fn();
+    }
+    function onKey(e) {
+      if (e.key === "Escape") { e.preventDefault(); close(opt.onNo); return; }
+      if (e.key === "Tab") {                       /* 포커스를 창 안에 가둔다 */
+        var f = [noBtn, yesBtn];
+        var i = f.indexOf(document.activeElement);
+        e.preventDefault();
+        f[(i + (e.shiftKey ? f.length - 1 : 1) + f.length) % f.length].focus();
+        return;
+      }
+      /* 응시 화면 단축키가 창 뒤에서 도는 것을 막는다 */
+      e.stopPropagation();
+    }
+    noBtn.addEventListener("click", function () { close(opt.onNo); });
+    yesBtn.addEventListener("click", function () { close(opt.onYes); });
+    back.addEventListener("mousedown", function (e) { if (e.target === back) close(opt.onNo); });
+    document.addEventListener("keydown", onKey, true);
+    document.body.appendChild(back);
+    noBtn.focus();                                  /* 실수로 나가지 않도록 '아니오'에 먼저 둔다 */
+  }
+
   /* ---------------- 홈 ---------------- */
 
   function homeTabs() {
@@ -734,11 +774,14 @@
       el("span", { class: "setcode", text: def.code }),
       timer,
       el("button", {
-        class: "iconbtn", type: "button", text: "중단",
+        class: "iconbtn", type: "button", text: "나가기",
         onclick: function () {
-          if (confirm("검사를 중단하고 홈으로 돌아간다. 진행 상황은 저장되어 나중에 이어서 응시할 수 있다.")) {
-            saveSession(); stopTimer(); go("home");
-          }
+          confirmBox({
+            title: "정말 나가시겠습니까?",
+            body: "지금까지 응답한 내용과 남은 시간은 저장된다. 홈에서 '이어서 응시'를 누르면 멈춘 지점부터 다시 시작한다.",
+            yes: "예, 나갑니다", no: "아니오, 계속 풉니다",
+            onYes: function () { saveSession(); stopTimer(); go("home"); }
+          });
         }
       })
     ]));
@@ -1487,6 +1530,7 @@
     store: store, storageOK: function () { return storageOK; },
     toast: toast, appbar: appbar, go: go, render: render,
     download: download, copyText: copyText, buildCSVLine: null,
+    confirmBox: confirmBox,
     percentileOf: percentileOf, erf: erf,
     state: state
   };

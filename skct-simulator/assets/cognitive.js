@@ -151,6 +151,23 @@
 
   function togglePause() { if (cog.session && cog.session.paused) resume(); else pause(); }
 
+  /* 나가기 — 확인하는 동안 시간이 흐르면 안 되므로 먼저 멈춘다.
+     '아니오'를 고르면 멈추기 전 상태로 되돌린다. */
+  function leaveTest() {
+    var s = cog.session;
+    if (!s || cog.submitting) return;
+    var wasRunning = !s.paused;
+    if (wasRunning) pause();
+    S.confirmBox({
+      title: "정말 나가시겠습니까?",
+      body: "시간은 멈춰 두었다. 지금까지 푼 내용과 남은 시간은 저장되며, 홈에서 '이어서 응시'를 누르면 멈춘 지점부터 다시 시작한다.",
+      yes: "예, 나갑니다",
+      no: "아니오, 계속 풉니다",
+      onYes: function () { flushQuestionTime(); saveSession(); stopTimer(); go("home"); },
+      onNo: function () { if (wasRunning) resume(); }
+    });
+  }
+
   /* ---------------- 개념 및 치트키 정리 ---------------- */
 
   var GUIDE = window.SKCT_COG_GUIDE || [];
@@ -632,9 +649,12 @@
       el("button", {
         class: "iconbtn", type: "button", text: "나가기",
         onclick: function () {
-          if (confirm("검사를 나간다. 진행 상황은 저장되어 나중에 이어서 응시할 수 있다.")) {
-            saveSession(); stopTimer(); go("home");
-          }
+          S.confirmBox({
+            title: "정말 나가시겠습니까?",
+            body: "여기까지의 응답은 저장된다. 홈에서 '이어서 응시'를 누르면 이 교시부터 다시 시작한다.",
+            yes: "예, 나갑니다", no: "아니오, 계속 풉니다",
+            onYes: function () { saveSession(); stopTimer(); go("home"); }
+          });
         }
       })
     ]));
@@ -821,13 +841,7 @@
       }),
       el("button", {
         class: "iconbtn", type: "button", text: "나가기",
-        onclick: function () {
-          if (confirm("검사를 나간다. 진행 상황은 저장되어 나중에 이어서 응시할 수 있다.")) {
-            flushQuestionTime();
-            if (!s.paused) { s.carryMs = partElapsedMs(); s.paused = true; s.startedAt = null; }
-            saveSession(); stopTimer(); go("home");
-          }
-        }
+        onclick: leaveTest
       })
     ]));
 
@@ -1460,6 +1474,8 @@
 
   document.addEventListener("keydown", function (e) {
     if (S.state.screen !== "cog-test" || !cog.session || cog.submitting) return;
+    if (document.querySelector(".modal-back")) return;          /* 확인창이 떠 있다 */
+    if (e.target && e.target.closest && e.target.closest(".toolwin")) return;   /* 메모장·계산기 안 */
     if (e.metaKey || e.ctrlKey || e.altKey || !e.key) return;
     var tag = (e.target.tagName || "").toLowerCase();
     if (tag === "input" || tag === "textarea" || e.target.isContentEditable) return;
@@ -1494,12 +1510,14 @@
       return null;
     },
     afterRender: function (screen) {
-      if (screen === "cog-test" && cog.session && !cog.session.paused) {
+      var live = screen === "cog-test" && cog.session && !cog.session.paused;
+      if (live) {
         markQuestionEnter();
         startTimer();
       } else {
         stopTimer();
       }
+      if (window.SKCT_TOOLS) window.SKCT_TOOLS.setActive(!!live);
     },
     isBusy: function () {
       return !!(cog.session && !cog.session.paused && S.state.screen === "cog-test" && !cog.submitting);
